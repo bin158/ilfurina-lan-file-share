@@ -1,5 +1,5 @@
 import React from 'react';
-import { HardDrive, FolderGit2, History, Users, QrCode, LogOut, Key, Shield, Palette, Languages } from 'lucide-react';
+import { HardDrive, FolderGit2, History, Users, QrCode, LogOut, Key, Shield, Palette, Languages, Server } from 'lucide-react';
 import { useI18n } from '../I18nContext';
 
 export default function Navbar({ user, activeTab, setActiveTab, onLogout, onChangePassword, onOpenLanModal }) {
@@ -35,13 +35,23 @@ export default function Navbar({ user, activeTab, setActiveTab, onLogout, onChan
           </button>
 
           {user.role === 'admin' && (
-            <button
-              className={`nav-btn ${activeTab === 'users' ? 'active' : ''}`}
-              onClick={() => setActiveTab('users')}
-            >
-              <Users size={18} />
-              <span>{t('users')}</span>
-            </button>
+            <>
+              <button
+                className={`nav-btn ${activeTab === 'users' ? 'active' : ''}`}
+                onClick={() => setActiveTab('users')}
+              >
+                <Users size={18} />
+                <span>{t('users')}</span>
+              </button>
+
+              <button
+                className={`nav-btn ${activeTab === 'server' ? 'active' : ''}`}
+                onClick={() => setActiveTab('server')}
+              >
+                <Server size={18} color="var(--primary)" />
+                <span>{t('serverAdmin')}</span>
+              </button>
+            </>
           )}
 
           <button className="nav-btn" onClick={onOpenLanModal} title={t('scanTip')}>
@@ -78,8 +88,8 @@ export default function Navbar({ user, activeTab, setActiveTab, onLogout, onChan
               onChange={(e) => setLang(e.target.value)}
               style={{ fontSize: '0.8rem', padding: '0.2rem 0.4rem', height: '32px', borderRadius: '6px' }}
             >
-              <option value="zh">🇨🇳 简体中文</option>
-              <option value="en">🇺🇸 English</option>
+              <option value="zh">🇨🇳 简</option>
+              <option value="en">🇺🇸 EN</option>
             </select>
           </div>
 
@@ -120,13 +130,23 @@ export default function Navbar({ user, activeTab, setActiveTab, onLogout, onChan
         </button>
 
         {user.role === 'admin' && (
-          <button
-            className={`mobile-tab-btn ${activeTab === 'users' ? 'active' : ''}`}
-            onClick={() => setActiveTab('users')}
-          >
-            <Users size={20} />
-            <span>{t('users')}</span>
-          </button>
+          <>
+            <button
+              className={`mobile-tab-btn ${activeTab === 'users' ? 'active' : ''}`}
+              onClick={() => setActiveTab('users')}
+            >
+              <Users size={20} />
+              <span>{t('users')}</span>
+            </button>
+
+            <button
+              className={`mobile-tab-btn ${activeTab === 'server' ? 'active' : ''}`}
+              onClick={() => setActiveTab('server')}
+            >
+              <Server size={20} color="var(--primary)" />
+              <span>{t('serverAdmin')}</span>
+            </button>
+          </>
         )}
 
         <button

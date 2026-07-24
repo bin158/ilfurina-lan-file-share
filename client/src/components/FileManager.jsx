@@ -49,9 +49,18 @@ export default function FileManager({ user, token }) {
   const [relativePaths, setRelativePaths] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const folderInputRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  // Set webkitdirectory DOM attribute dynamically when folder mode is active
+  useEffect(() => {
+    if (folderInputRef.current) {
+      folderInputRef.current.setAttribute('webkitdirectory', '');
+      folderInputRef.current.setAttribute('directory', '');
+    }
+  }, [uploadMode, showUploadModal]);
 
   const fetchFiles = async (targetPath = currentPath) => {
     setLoading(true);
@@ -153,8 +162,8 @@ export default function FileManager({ user, token }) {
     const formData = new FormData();
     for (let i = 0; i < uploadFiles.length; i++) {
       formData.append('files', uploadFiles[i]);
-      formData.append('relativePaths', relativePaths[i] || uploadFiles[i].name);
     }
+    formData.append('relativePathsJson', JSON.stringify(relativePaths));
 
     try {
       const res = await fetch(`/api/files/upload?path=${encodeURIComponent(currentPath)}`, {
@@ -171,6 +180,86 @@ export default function FileManager({ user, token }) {
       fetchFiles(currentPath);
     } catch (err) {
       alert(err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Drag and Drop folder & file upload support
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    if (user.can_upload) setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (!user.can_upload) return;
+
+    const dtItems = e.dataTransfer.items;
+    if (!dtItems || dtItems.length === 0) return;
+
+    setUploading(true);
+    const filesWithPaths = [];
+
+    const readEntry = async (entry, pathStr = '') => {
+      if (entry.isFile) {
+        return new Promise((resolve) => {
+          entry.file((file) => {
+            filesWithPaths.push({ file, relativePath: pathStr + file.name });
+            resolve();
+          });
+        });
+      } else if (entry.isDirectory) {
+        const dirReader = entry.createReader();
+        const readAllEntries = async () => {
+          const entries = await new Promise((resolve) => dirReader.readEntries(resolve));
+          if (entries.length === 0) return;
+          for (const child of entries) {
+            await readEntry(child, pathStr + entry.name + '/');
+          }
+          await readAllEntries();
+        };
+        await readAllEntries();
+      }
+    };
+
+    try {
+      for (let i = 0; i < dtItems.length; i++) {
+        const entry = dtItems[i].webkitGetAsEntry ? dtItems[i].webkitGetAsEntry() : null;
+        if (entry) {
+          await readEntry(entry, '');
+        } else {
+          const file = dtItems[i].getAsFile();
+          if (file) filesWithPaths.push({ file, relativePath: file.name });
+        }
+      }
+
+      if (filesWithPaths.length > 0) {
+        const formData = new FormData();
+        const rels = [];
+        filesWithPaths.forEach(fp => {
+          formData.append('files', fp.file);
+          rels.push(fp.relativePath);
+        });
+        formData.append('relativePathsJson', JSON.stringify(rels));
+
+        const res = await fetch(`/api/files/upload?path=${encodeURIComponent(currentPath)}`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Upload failed');
+        fetchFiles(currentPath);
+      }
+    } catch (err) {
+      alert('Upload error: ' + err.message);
     } finally {
       setUploading(false);
     }
@@ -199,7 +288,19 @@ export default function FileManager({ user, token }) {
   );
 
   return (
-    <div>
+    <div onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
+      {isDragging && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(99, 102, 241, 0.4)',
+          backdropFilter: 'blur(8px)', zIndex: 9999, display: 'flex',
+          flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          color: 'white', fontSize: '1.25rem', fontWeight: 700, border: '4px dashed white'
+        }}>
+          <Upload size={48} style={{ marginBottom: '1rem' }} />
+          <span>Drop files or folders to upload into "{currentPath || 'Root Share'}"</span>
+        </div>
+      )}
+
       {/* Top Controls Bar */}
       <div className="glass-card" style={{ padding: '0.85rem 1rem', marginBottom: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
@@ -339,7 +440,7 @@ export default function FileManager({ user, token }) {
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
                         {getFileIcon(item)}
-                        <span style={{ fontWeight: item.isDirectory ? 600 : 400, color: item.isDirectory ? 'var(--text-main)' : 'var(--text-main)' }}>
+                        <span style={{ fontWeight: item.isDirectory ? 600 : 400, color: 'var(--text-main)' }}>
                           {item.name}
                         </span>
                       </div>
@@ -464,8 +565,6 @@ export default function FileManager({ user, token }) {
                   <input
                     type="file"
                     className="form-input"
-                    webkitdirectory="true"
-                    directory="true"
                     multiple
                     ref={folderInputRef}
                     onChange={handleFileChange}

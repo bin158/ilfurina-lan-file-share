@@ -106,6 +106,24 @@ If you prefer to run directly on your host machine:
 
 ---
 
+### 3. 📱 Mobile Phone Server Setup (Android via Termux)
+Turn any Android phone or tablet into a portable LAN file sharing server:
+```bash
+# 1. Open Termux on Android and install Node.js & Git
+pkg update && pkg install nodejs-lts git -y
+
+# 2. Clone repository & install dependencies
+git clone https://github.com/bin158/ilfurina-lan-file-share.git
+cd ilfurina-lan-file-share
+npm run install:all
+
+# 3. Start LAN-Share Server
+npm start
+```
+> 💡 **Mobile Server Management**: Once started, open the server URL in your mobile browser and navigate to the **"Server"** tab in the bottom bar to manage root share directories, broadcast notifications, and download logs.
+
+---
+
 ## 📡 RESTful API Reference
 
 | Endpoint | Method | Auth Required | Description |

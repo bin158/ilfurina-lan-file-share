@@ -209,14 +209,19 @@ router.post('/upload', authenticateToken, (req, res) => {
     try {
       const baseSubPath = req.query.path || '';
       let relativePaths = [];
-      if (req.body.relativePaths) {
+
+      if (req.body.relativePathsJson) {
+        try {
+          relativePaths = JSON.parse(req.body.relativePathsJson);
+        } catch (e) {}
+      } else if (req.body.relativePaths) {
         relativePaths = Array.isArray(req.body.relativePaths) ? req.body.relativePaths : [req.body.relativePaths];
       }
 
       const files = req.files || [];
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const relPath = relativePaths[i] || file.originalname;
+        const relPath = (relativePaths && relativePaths[i]) ? relativePaths[i] : file.originalname;
         const targetSub = path.join(baseSubPath, relPath);
         const { absolute } = getSafePath(targetSub);
 
@@ -225,7 +230,11 @@ router.post('/upload', authenticateToken, (req, res) => {
           fs.mkdirSync(targetDir, { recursive: true });
         }
 
-        fs.renameSync(file.path, absolute);
+        // Copy then remove to safely handle cross-device / cross-volume moves in Docker & Linux
+        fs.copyFileSync(file.path, absolute);
+        try {
+          fs.unlinkSync(file.path);
+        } catch (unlinkErr) {}
       }
 
       res.json({ message: 'Files and folders uploaded successfully', count: files.length });
