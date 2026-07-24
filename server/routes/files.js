@@ -34,6 +34,25 @@ function getSafePath(subPath = '') {
   return { absolute, relative: path.relative(root, absolute), root };
 }
 
+// Helper: Get unique path for auto-rename when duplicate file/folder exists
+function getUniquePath(filePath) {
+  if (!fs.existsSync(filePath)) return filePath;
+
+  const dir = path.dirname(filePath);
+  const ext = path.extname(filePath);
+  const name = path.basename(filePath, ext);
+
+  let counter = 1;
+  let newPath = path.join(dir, `${name} (${counter})${ext}`);
+
+  while (fs.existsSync(newPath)) {
+    counter++;
+    newPath = path.join(dir, `${name} (${counter})${ext}`);
+  }
+
+  return newPath;
+}
+
 // Check user allowed path permission
 function isPathAllowed(user, relativePath) {
   if (user.role === 'admin' || user.allowed_paths === '*') return true;
@@ -197,6 +216,39 @@ router.get('/preview', authenticateToken, (req, res) => {
 
 import AdmZip from 'adm-zip';
 
+// CHECK CONFLICTS BEFORE UPLOAD
+router.post('/check-conflicts', authenticateToken, (req, res) => {
+  try {
+    const baseSubPath = req.query.path || req.body.path || '';
+    const files = req.body.files || [];
+    const autoUnzip = req.body.autoUnzip === true;
+
+    const conflicts = [];
+
+    if (autoUnzip) {
+      for (const fileName of files) {
+        const targetSub = path.join(baseSubPath, fileName);
+        const { absolute } = getSafePath(targetSub);
+        if (fs.existsSync(absolute)) {
+          conflicts.push(fileName);
+        }
+      }
+    } else {
+      for (const relPath of files) {
+        const targetSub = path.join(baseSubPath, relPath);
+        const { absolute } = getSafePath(targetSub);
+        if (fs.existsSync(absolute)) {
+          conflicts.push(relPath);
+        }
+      }
+    }
+
+    res.json({ hasConflict: conflicts.length > 0, conflicts });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // UPLOAD FILES AND FOLDERS (supporting directory tree & mobile zip extraction!)
 router.post('/upload', authenticateToken, (req, res) => {
   if (!req.user.can_upload) {
@@ -211,6 +263,7 @@ router.post('/upload', authenticateToken, (req, res) => {
     try {
       const baseSubPath = req.query.path || '';
       const autoUnzip = req.body.autoUnzip === 'true' || req.query.unzip === 'true';
+      const conflictAction = req.body.conflictAction || req.query.conflictAction || 'replace'; // 'replace' or 'rename'
       let relativePaths = [];
 
       if (req.body.relativePathsJson) {
@@ -230,14 +283,37 @@ router.post('/upload', authenticateToken, (req, res) => {
           // Unzip folder directly into target directory for mobile users
           const { absolute: targetAbsDir } = getSafePath(baseSubPath);
           const zip = new AdmZip(file.path);
-          zip.extractAllTo(targetAbsDir, true);
+          if (conflictAction === 'rename') {
+            const zipEntries = zip.getEntries();
+            zipEntries.forEach(entry => {
+              let entryTargetPath = path.join(targetAbsDir, entry.entryName);
+              if (!entry.isDirectory) {
+                entryTargetPath = getUniquePath(entryTargetPath);
+                const entryDir = path.dirname(entryTargetPath);
+                if (!fs.existsSync(entryDir)) {
+                  fs.mkdirSync(entryDir, { recursive: true });
+                }
+                fs.writeFileSync(entryTargetPath, entry.getData());
+              } else {
+                if (!fs.existsSync(entryTargetPath)) {
+                  fs.mkdirSync(entryTargetPath, { recursive: true });
+                }
+              }
+            });
+          } else {
+            zip.extractAllTo(targetAbsDir, true);
+          }
           try { fs.unlinkSync(file.path); } catch (e) {}
           continue;
         }
 
         const relPath = (relativePaths && relativePaths[i]) ? relativePaths[i] : file.originalname;
         const targetSub = path.join(baseSubPath, relPath);
-        const { absolute } = getSafePath(targetSub);
+        let { absolute } = getSafePath(targetSub);
+
+        if (conflictAction === 'rename') {
+          absolute = getUniquePath(absolute);
+        }
 
         const targetDir = path.dirname(absolute);
         if (!fs.existsSync(targetDir)) {

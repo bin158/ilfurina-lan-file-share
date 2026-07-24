@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, UserPlus, Shield, Lock, Trash2, Edit3, CheckCircle, XCircle, Download, Upload, Folder, Key, X, HardDrive } from 'lucide-react';
+import { Users, UserPlus, Shield, Lock, Trash2, Edit3, CheckCircle, XCircle, Download, Upload, Folder, Key, X, HardDrive, FolderPlus, Plus, ChevronDown } from 'lucide-react';
 import { useI18n } from '../I18nContext';
 
 export default function UserManagement({ token, currentUser }) {
@@ -7,6 +7,9 @@ export default function UserManagement({ token, currentUser }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Server directory list for allowed_paths dropdown
+  const [serverDirs, setServerDirs] = useState([]);
 
   // Modals
   const [showAddModal, setShowAddModal] = useState(false);
@@ -37,8 +40,22 @@ export default function UserManagement({ token, currentUser }) {
     }
   };
 
+  const fetchServerDirectories = async () => {
+    try {
+      const res = await fetch('/api/files/list?path=', { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      if (res.ok && Array.isArray(data.items)) {
+        const dirs = data.items.filter(i => i.isDirectory).map(i => i.name);
+        setServerDirs(dirs);
+      }
+    } catch (e) {
+      console.error('Failed to fetch server directories:', e);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
+    fetchServerDirectories();
     const interval = setInterval(() => {
       fetchUsers(true);
     }, 3000);
@@ -92,7 +109,7 @@ export default function UserManagement({ token, currentUser }) {
 
   const handleDelete = async (userId) => {
     if (userId === currentUser.id) {
-      alert('Cannot delete current logged in account');
+      alert(t('cannotDeleteSelf'));
       return;
     }
     if (!window.confirm(t('confirmDeleteUser'))) return;
@@ -134,18 +151,34 @@ export default function UserManagement({ token, currentUser }) {
       can_delete: Boolean(u.can_delete),
       allowed_paths: u.allowed_paths || '*'
     });
+    fetchServerDirectories();
+  };
+
+  const handleAppendPath = (folderName) => {
+    if (folderName === '*') {
+      setFormData(prev => ({ ...prev, allowed_paths: '*' }));
+      return;
+    }
+    if (formData.allowed_paths === '*' || !formData.allowed_paths.trim()) {
+      setFormData(prev => ({ ...prev, allowed_paths: folderName }));
+    } else {
+      const currentArr = formData.allowed_paths.split(',').map(p => p.trim()).filter(Boolean);
+      if (!currentArr.includes(folderName)) {
+        setFormData(prev => ({ ...prev, allowed_paths: [...currentArr, folderName].join(', ') }));
+      }
+    }
   };
 
   return (
     <div>
       <div className="glass-card section-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <div style={{ background: 'rgba(244, 63, 94, 0.15)', border: '1px solid rgba(244, 63, 94, 0.3)', width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Users size={18} color="#f43f5e" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div style={{ background: 'rgba(244, 63, 94, 0.15)', border: '1px solid rgba(244, 63, 94, 0.35)', width: '40px', height: '40px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Users size={20} color="#f43f5e" />
           </div>
           <div style={{ minWidth: 0 }}>
-            <h3 style={{ fontSize: '0.98rem', fontWeight: 600 }}>{t('userMgmtTitle')}</h3>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Role-based Access Control</p>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 600 }}>{t('userMgmtTitle')}</h3>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Role-based Access Control</p>
           </div>
         </div>
 
@@ -155,37 +188,37 @@ export default function UserManagement({ token, currentUser }) {
             <span>{t('realtimeSync')}</span>
           </div>
 
-          <button className="btn btn-primary" onClick={() => { resetForm(); setShowAddModal(true); }}>
-            <UserPlus size={15} />
+          <button className="btn btn-primary" onClick={() => { resetForm(); fetchServerDirectories(); setShowAddModal(true); }}>
+            <UserPlus size={16} />
             <span>{t('addUserBtn')}</span>
           </button>
         </div>
       </div>
 
       {error && (
-        <div style={{ background: 'rgba(244, 63, 94, 0.15)', border: '1px solid rgba(244, 63, 94, 0.3)', color: '#fda4af', padding: '0.75rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem', fontSize: '0.82rem' }}>
+        <div style={{ background: 'rgba(244, 63, 94, 0.15)', border: '1px solid rgba(244, 63, 94, 0.35)', color: '#fda4af', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '1.25rem', fontSize: '0.85rem' }}>
           {error}
         </div>
       )}
 
       <div className="glass-card" style={{ overflow: 'hidden', padding: '0.5rem' }}>
         {loading ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
+          <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>{t('loading')}</div>
         ) : (
           <>
             {/* MOBILE CARDS VIEW */}
             <div className="mobile-card-list">
               {users.map((u) => (
-                <div key={u.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '0.85rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <div key={u.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>{u.username}</span>
+                      <span style={{ fontWeight: 700, fontSize: '0.98rem' }}>{u.username}</span>
                       <span className={`role-tag ${u.role}`}>
                         {u.role === 'admin' ? t('admin') : t('guest')}
                       </span>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '0.35rem' }}>
+                    <div style={{ display: 'flex', gap: '0.4rem' }}>
                       <button className="btn btn-secondary btn-icon" onClick={() => openEditModal(u)} title={t('edit')}>
                         <Edit3 size={15} />
                       </button>
@@ -197,13 +230,13 @@ export default function UserManagement({ token, currentUser }) {
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
-                    {u.can_download && <span style={{ background: 'rgba(16,185,129,0.15)', color: '#34d399', fontSize: '0.72rem', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>{t('canDownload')}</span>}
-                    {u.can_upload && <span style={{ background: 'rgba(56,189,248,0.15)', color: '#38bdf8', fontSize: '0.72rem', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>{t('canUpload')}</span>}
-                    {u.can_delete && <span style={{ background: 'rgba(244,63,94,0.15)', color: '#fb7185', fontSize: '0.72rem', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>{t('canDelete')}</span>}
+                  <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.6rem' }}>
+                    {u.can_download && <span style={{ background: 'rgba(16,185,129,0.15)', color: '#34d399', fontSize: '0.72rem', padding: '0.18rem 0.45rem', borderRadius: '5px' }}>{t('canDownload')}</span>}
+                    {u.can_upload && <span style={{ background: 'rgba(56,189,248,0.15)', color: '#38bdf8', fontSize: '0.72rem', padding: '0.18rem 0.45rem', borderRadius: '5px' }}>{t('canUpload')}</span>}
+                    {u.can_delete && <span style={{ background: 'rgba(244,63,94,0.15)', color: '#fb7185', fontSize: '0.72rem', padding: '0.18rem 0.45rem', borderRadius: '5px' }}>{t('canDelete')}</span>}
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-dim)', paddingTop: '0.4rem', borderTop: '1px solid var(--border-color)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-dim)', paddingTop: '0.5rem', borderTop: '1px solid var(--border-color)' }}>
                     <span>Scope: <code style={{ color: 'var(--text-muted)' }}>{u.allowed_paths || '*'}</code></span>
                     <span>Downloads: <b>{u.download_count || 0}</b></span>
                   </div>
@@ -235,10 +268,10 @@ export default function UserManagement({ token, currentUser }) {
                       </span>
                     </td>
                     <td>
-                      <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
-                        {u.can_download && <span style={{ background: 'rgba(16,185,129,0.15)', color: '#34d399', fontSize: '0.72rem', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>{t('canDownload')}</span>}
-                        {u.can_upload && <span style={{ background: 'rgba(56,189,248,0.15)', color: '#38bdf8', fontSize: '0.72rem', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>{t('canUpload')}</span>}
-                        {u.can_delete && <span style={{ background: 'rgba(244,63,94,0.15)', color: '#fb7185', fontSize: '0.72rem', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>{t('canDelete')}</span>}
+                      <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                        {u.can_download && <span style={{ background: 'rgba(16,185,129,0.15)', color: '#34d399', fontSize: '0.72rem', padding: '0.18rem 0.45rem', borderRadius: '5px' }}>{t('canDownload')}</span>}
+                        {u.can_upload && <span style={{ background: 'rgba(56,189,248,0.15)', color: '#38bdf8', fontSize: '0.72rem', padding: '0.18rem 0.45rem', borderRadius: '5px' }}>{t('canUpload')}</span>}
+                        {u.can_delete && <span style={{ background: 'rgba(244,63,94,0.15)', color: '#fb7185', fontSize: '0.72rem', padding: '0.18rem 0.45rem', borderRadius: '5px' }}>{t('canDelete')}</span>}
                       </div>
                     </td>
                     <td style={{ fontFamily: 'monospace', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
@@ -246,7 +279,7 @@ export default function UserManagement({ token, currentUser }) {
                     </td>
                     <td style={{ fontSize: '0.85rem' }}>{u.download_count || 0}</td>
                     <td style={{ textAlign: 'right' }}>
-                      <div style={{ display: 'inline-flex', gap: '0.35rem' }}>
+                      <div style={{ display: 'inline-flex', gap: '0.4rem' }}>
                         <button className="btn btn-secondary btn-icon" onClick={() => openEditModal(u)} title={t('edit')}>
                           <Edit3 size={15} />
                         </button>
@@ -303,7 +336,7 @@ export default function UserManagement({ token, currentUser }) {
               <div className="form-group">
                 <label className="form-label">{t('role')}</label>
                 <select
-                  className="form-input"
+                  className="shadcn-select form-input"
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                 >
@@ -314,7 +347,7 @@ export default function UserManagement({ token, currentUser }) {
 
               <div className="form-group">
                 <label className="form-label">{t('permissions')}</label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer', marginBottom: '0.3rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer', marginBottom: '0.4rem' }}>
                   <input
                     type="checkbox"
                     checked={formData.can_download}
@@ -323,7 +356,7 @@ export default function UserManagement({ token, currentUser }) {
                   <span>{t('canDownload')}</span>
                 </label>
 
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer', marginBottom: '0.3rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer', marginBottom: '0.4rem' }}>
                   <input
                     type="checkbox"
                     checked={formData.can_upload}
@@ -342,17 +375,42 @@ export default function UserManagement({ token, currentUser }) {
                 </label>
               </div>
 
+              {/* ALLOWED PATHS WITH DROPDOWN MENU & QUICK PRESETS */}
               <div className="form-group">
                 <label className="form-label">{t('allowedPathsHint')}</label>
+                
+                {/* DROPDOWN MENU SELECTOR */}
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.4rem' }}>
+                  <select
+                    className="shadcn-select"
+                    style={{ flex: 1 }}
+                    defaultValue=""
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        handleAppendPath(e.target.value);
+                        e.target.value = "";
+                      }
+                    }}
+                  >
+                    <option value="" disabled>{t('selectPresetPath')}</option>
+                    <option value="*">🌟 {t('allDirectories')}</option>
+                    {serverDirs.map(d => (
+                      <option key={d} value={d}>📁 {d}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* TEXT INPUT FOR CUSTOM OR COMBINED PATHS */}
                 <input
                   type="text"
                   className="form-input"
+                  placeholder="e.g. documents, pictures"
                   value={formData.allowed_paths}
                   onChange={(e) => setFormData({ ...formData, allowed_paths: e.target.value })}
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1.25rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem', marginTop: '1.5rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => { setShowAddModal(false); setEditUser(null); }}>{t('cancel')}</button>
                 <button type="submit" className="btn btn-primary">{t('save')}</button>
               </div>
