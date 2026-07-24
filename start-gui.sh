@@ -9,17 +9,20 @@ if ! command -v node &> /dev/null; then
     exit 1
 fi
 
-# Check electron installed in server
+# Install dependencies if missing
 if [ ! -d "server/node_modules/electron" ]; then
     echo "📦 正在安装 Desktop GUI 依赖..."
     npm install --prefix server
 fi
 
-# Build client if dist folder does not exist
-if [ ! -d "client/dist" ]; then
-    echo "🔨 正在构建 Web 前端..."
-    npm run build --prefix client
+if [ ! -d "client/node_modules" ]; then
+    echo "📦 正在安装前端依赖..."
+    npm install --prefix client
 fi
+
+# Always build client to ensure Web UI served to mobile/web clients is updated
+echo "🔨 正在同步构建最新 Web 界面..."
+npm run build --prefix client
 
 echo "🚀 启动桌面 Admin GUI 窗口..."
 npx electron server/gui/main.js --disable-vulkan --ozone-platform=x11 --no-sandbox

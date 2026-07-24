@@ -21,10 +21,8 @@ if not exist "client\node_modules" (
     npm install --prefix client
 )
 
-if not exist "client\dist" (
-    echo 🔨 正在构建前端页面...
-    npm run build --prefix client
-)
+echo 🔨 正在同步构建最新前端 Web 界面...
+npm run build --prefix client
 
 echo 🌐 启动服务器中...
 node server\index.js

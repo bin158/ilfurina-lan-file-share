@@ -306,7 +306,7 @@ export default function FileManager({ user, token }) {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
           
           {/* Breadcrumbs Navigation */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexWrap: 'wrap', fontSize: '0.85rem' }}>
+          <div className="breadcrumbs-wrapper">
             <button
               className="btn btn-secondary"
               onClick={() => setCurrentPath('')}

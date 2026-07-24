@@ -16,10 +16,13 @@ if not exist "server\node_modules\electron" (
     npm install --prefix server
 )
 
-if not exist "client\dist" (
-    echo 🔨 正在构建 Web 前端...
-    npm run build --prefix client
+if not exist "client\node_modules" (
+    echo 📦 正在安装前端依赖...
+    npm install --prefix client
 )
+
+echo 🔨 正在同步构建最新 Web 界面...
+npm run build --prefix client
 
 echo 🚀 启动桌面 Admin GUI 窗口...
 npx electron server\gui\main.js

@@ -134,68 +134,47 @@ export default function UserManagement({ token, currentUser }) {
 
   return (
     <div>
-      <div className="glass-card" style={{ padding: '1rem 1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-          <div style={{ background: 'rgba(244, 63, 94, 0.15)', border: '1px solid rgba(244, 63, 94, 0.3)', width: '38px', height: '38px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Users size={20} color="#f43f5e" />
+      <div className="glass-card" style={{ padding: '0.85rem 1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.6rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <div style={{ background: 'rgba(244, 63, 94, 0.15)', border: '1px solid rgba(244, 63, 94, 0.3)', width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Users size={18} color="#f43f5e" />
           </div>
           <div>
-            <h3 style={{ fontSize: '1rem', fontWeight: 600 }}>{t('userMgmtTitle')}</h3>
-            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Role-based Access Control</p>
+            <h3 style={{ fontSize: '0.98rem', fontWeight: 600 }}>{t('userMgmtTitle')}</h3>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Role-based Access Control</p>
           </div>
         </div>
 
         <button className="btn btn-primary" onClick={() => { resetForm(); setShowAddModal(true); }}>
-          <UserPlus size={16} />
+          <UserPlus size={15} />
           <span>{t('addUserBtn')}</span>
         </button>
       </div>
 
       {error && (
-        <div style={{ background: 'rgba(244, 63, 94, 0.15)', border: '1px solid rgba(244, 63, 94, 0.3)', color: '#fda4af', padding: '0.85rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem', fontSize: '0.85rem' }}>
+        <div style={{ background: 'rgba(244, 63, 94, 0.15)', border: '1px solid rgba(244, 63, 94, 0.3)', color: '#fda4af', padding: '0.75rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem', fontSize: '0.82rem' }}>
           {error}
         </div>
       )}
 
       <div className="glass-card" style={{ overflow: 'hidden', padding: '0.5rem' }}>
         {loading ? (
-          <div style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
+          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
         ) : (
-          <table className="desktop-table">
-            <thead>
-              <tr>
-                <th>{t('username')}</th>
-                <th>{t('role')}</th>
-                <th>{t('permissions')}</th>
-                <th>{t('allowedPaths')}</th>
-                <th>{t('downloadCount')}</th>
-                <th style={{ textAlign: 'right' }}>{t('actionsCol')}</th>
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            {/* MOBILE CARDS VIEW */}
+            <div className="mobile-card-list">
               {users.map((u) => (
-                <tr key={u.id}>
-                  <td>
-                    <div style={{ fontWeight: 600 }}>{u.username}</div>
-                  </td>
-                  <td>
-                    <span className={`role-tag ${u.role}`}>
-                      {u.role === 'admin' ? t('admin') : t('guest')}
-                    </span>
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
-                      {u.can_download && <span style={{ background: 'rgba(16,185,129,0.15)', color: '#34d399', fontSize: '0.72rem', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>{t('canDownload')}</span>}
-                      {u.can_upload && <span style={{ background: 'rgba(56,189,248,0.15)', color: '#38bdf8', fontSize: '0.72rem', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>{t('canUpload')}</span>}
-                      {u.can_delete && <span style={{ background: 'rgba(244,63,94,0.15)', color: '#fb7185', fontSize: '0.72rem', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>{t('canDelete')}</span>}
+                <div key={u.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '0.85rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>{u.username}</span>
+                      <span className={`role-tag ${u.role}`}>
+                        {u.role === 'admin' ? t('admin') : t('guest')}
+                      </span>
                     </div>
-                  </td>
-                  <td style={{ fontFamily: 'monospace', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                    {u.allowed_paths || '*'}
-                  </td>
-                  <td style={{ fontSize: '0.85rem' }}>{u.download_count || 0}</td>
-                  <td style={{ textAlign: 'right' }}>
-                    <div style={{ display: 'inline-flex', gap: '0.35rem' }}>
+
+                    <div style={{ display: 'flex', gap: '0.35rem' }}>
                       <button className="btn btn-secondary btn-icon" onClick={() => openEditModal(u)} title={t('edit')}>
                         <Edit3 size={15} />
                       </button>
@@ -205,11 +184,73 @@ export default function UserManagement({ token, currentUser }) {
                         </button>
                       )}
                     </div>
-                  </td>
-                </tr>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+                    {u.can_download && <span style={{ background: 'rgba(16,185,129,0.15)', color: '#34d399', fontSize: '0.72rem', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>{t('canDownload')}</span>}
+                    {u.can_upload && <span style={{ background: 'rgba(56,189,248,0.15)', color: '#38bdf8', fontSize: '0.72rem', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>{t('canUpload')}</span>}
+                    {u.can_delete && <span style={{ background: 'rgba(244,63,94,0.15)', color: '#fb7185', fontSize: '0.72rem', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>{t('canDelete')}</span>}
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-dim)', paddingTop: '0.4rem', borderTop: '1px solid var(--border-color)' }}>
+                    <span>Scope: <code style={{ color: 'var(--text-muted)' }}>{u.allowed_paths || '*'}</code></span>
+                    <span>Downloads: <b>{u.download_count || 0}</b></span>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+
+            {/* DESKTOP TABLE VIEW */}
+            <table className="desktop-table">
+              <thead>
+                <tr>
+                  <th>{t('username')}</th>
+                  <th>{t('role')}</th>
+                  <th>{t('permissions')}</th>
+                  <th>{t('allowedPaths')}</th>
+                  <th>{t('downloadCount')}</th>
+                  <th style={{ textAlign: 'right' }}>{t('actionsCol')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((u) => (
+                  <tr key={u.id}>
+                    <td>
+                      <div style={{ fontWeight: 600 }}>{u.username}</div>
+                    </td>
+                    <td>
+                      <span className={`role-tag ${u.role}`}>
+                        {u.role === 'admin' ? t('admin') : t('guest')}
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
+                        {u.can_download && <span style={{ background: 'rgba(16,185,129,0.15)', color: '#34d399', fontSize: '0.72rem', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>{t('canDownload')}</span>}
+                        {u.can_upload && <span style={{ background: 'rgba(56,189,248,0.15)', color: '#38bdf8', fontSize: '0.72rem', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>{t('canUpload')}</span>}
+                        {u.can_delete && <span style={{ background: 'rgba(244,63,94,0.15)', color: '#fb7185', fontSize: '0.72rem', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>{t('canDelete')}</span>}
+                      </div>
+                    </td>
+                    <td style={{ fontFamily: 'monospace', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                      {u.allowed_paths || '*'}
+                    </td>
+                    <td style={{ fontSize: '0.85rem' }}>{u.download_count || 0}</td>
+                    <td style={{ textAlign: 'right' }}>
+                      <div style={{ display: 'inline-flex', gap: '0.35rem' }}>
+                        <button className="btn btn-secondary btn-icon" onClick={() => openEditModal(u)} title={t('edit')}>
+                          <Edit3 size={15} />
+                        </button>
+                        {u.id !== currentUser.id && (
+                          <button className="btn btn-danger btn-icon" onClick={() => handleDelete(u.id)} title={t('delete')}>
+                            <Trash2 size={15} />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
         )}
       </div>
 

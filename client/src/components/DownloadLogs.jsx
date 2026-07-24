@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { History, Trash2, RefreshCw, FileText, User, Globe, HardDrive } from 'lucide-react';
+import { History, Trash2, RefreshCw, FileText, User, Globe } from 'lucide-react';
 import { useI18n } from '../I18nContext';
 
 function formatBytes(bytes, decimals = 2) {
@@ -54,26 +54,26 @@ export default function DownloadLogs({ user, token }) {
 
   return (
     <div>
-      <div className="glass-card" style={{ padding: '1rem 1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-          <div style={{ background: 'rgba(99, 102, 241, 0.15)', border: '1px solid rgba(99, 102, 241, 0.3)', width: '38px', height: '38px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <History size={20} color="var(--primary)" />
+      <div className="glass-card" style={{ padding: '0.85rem 1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.6rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <div style={{ background: 'rgba(99, 102, 241, 0.15)', border: '1px solid rgba(99, 102, 241, 0.3)', width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <History size={18} color="var(--primary)" />
           </div>
           <div>
-            <h3 style={{ fontSize: '1rem', fontWeight: 600 }}>{t('logsTitle')}</h3>
-            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{t('logsSubtitle')}</p>
+            <h3 style={{ fontSize: '0.98rem', fontWeight: 600 }}>{t('logsTitle')}</h3>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('logsSubtitle')}</p>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.4rem' }}>
           <button className="btn btn-secondary" onClick={fetchLogs}>
-            <RefreshCw size={15} className={loading ? 'spin' : ''} />
+            <RefreshCw size={14} className={loading ? 'spin' : ''} />
             <span>{t('refresh')}</span>
           </button>
 
           {user.role === 'admin' && (
             <button className="btn btn-danger" onClick={handleClearLogs}>
-              <Trash2 size={15} />
+              <Trash2 size={14} />
               <span>{t('clearLogsBtn')}</span>
             </button>
           )}
@@ -81,61 +81,93 @@ export default function DownloadLogs({ user, token }) {
       </div>
 
       {error && (
-        <div style={{ background: 'rgba(244, 63, 94, 0.15)', border: '1px solid rgba(244, 63, 94, 0.3)', color: '#fda4af', padding: '0.85rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem', fontSize: '0.85rem' }}>
+        <div style={{ background: 'rgba(244, 63, 94, 0.15)', border: '1px solid rgba(244, 63, 94, 0.3)', color: '#fda4af', padding: '0.75rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem', fontSize: '0.82rem' }}>
           {error}
         </div>
       )}
 
       <div className="glass-card" style={{ overflow: 'hidden', padding: '0.5rem' }}>
         {loading ? (
-          <div style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
+          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
         ) : logs.length === 0 ? (
-          <div style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-            <History size={36} color="var(--text-dim)" style={{ marginBottom: '0.5rem' }} />
-            <p style={{ fontSize: '0.88rem' }}>{t('noLogs')}</p>
+          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+            <History size={36} color="var(--text-dim)" style={{ marginBottom: '0.4rem' }} />
+            <p style={{ fontSize: '0.85rem' }}>{t('noLogs')}</p>
           </div>
         ) : (
-          <table className="desktop-table">
-            <thead>
-              <tr>
-                <th>{t('downloadUser')}</th>
-                <th>{t('filename')}</th>
-                <th>{t('fileSize')}</th>
-                <th>{t('clientIp')}</th>
-                <th>{t('downloadTime')}</th>
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            {/* MOBILE CARDS VIEW */}
+            <div className="mobile-card-list">
               {logs.map((log) => (
-                <tr key={log.id}>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 500 }}>
+                <div key={log.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '0.75rem 0.85rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600, fontSize: '0.88rem' }}>
                       <User size={14} color="var(--primary)" />
                       <span>{log.username}</span>
                     </div>
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <FileText size={14} color="#10b981" />
-                      <span style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>{log.file_name}</span>
-                    </div>
-                  </td>
-                  <td style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>
-                    {formatBytes(log.file_size)}
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.82rem', color: '#06b6d4' }}>
-                      <Globe size={13} />
-                      <span>{log.ip_address}</span>
-                    </div>
-                  </td>
-                  <td style={{ color: 'var(--text-dim)', fontSize: '0.82rem' }}>
-                    {new Date(log.downloaded_at).toLocaleString()}
-                  </td>
-                </tr>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>
+                      {new Date(log.downloaded_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#10b981', fontFamily: 'monospace', fontSize: '0.82rem', marginBottom: '0.4rem', wordBreak: 'break-all' }}>
+                    <FileText size={14} color="#10b981" style={{ flexShrink: 0 }} />
+                    <span>{log.file_name}</span>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)', paddingTop: '0.3rem', borderTop: '1px solid var(--border-color)' }}>
+                    <span>Size: {formatBytes(log.file_size)}</span>
+                    <span style={{ color: '#06b6d4', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}>
+                      <Globe size={12} /> {log.ip_address}
+                    </span>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+
+            {/* DESKTOP TABLE VIEW */}
+            <table className="desktop-table">
+              <thead>
+                <tr>
+                  <th>{t('downloadUser')}</th>
+                  <th>{t('filename')}</th>
+                  <th>{t('fileSize')}</th>
+                  <th>{t('clientIp')}</th>
+                  <th>{t('downloadTime')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {logs.map((log) => (
+                  <tr key={log.id}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 500 }}>
+                        <User size={14} color="var(--primary)" />
+                        <span>{log.username}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <FileText size={14} color="#10b981" />
+                        <span style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>{log.file_name}</span>
+                      </div>
+                    </td>
+                    <td style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+                      {formatBytes(log.file_size)}
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.82rem', color: '#06b6d4' }}>
+                        <Globe size={13} />
+                        <span>{log.ip_address}</span>
+                      </div>
+                    </td>
+                    <td style={{ color: 'var(--text-dim)', fontSize: '0.82rem' }}>
+                      {new Date(log.downloaded_at).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
         )}
       </div>
     </div>
