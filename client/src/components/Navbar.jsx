@@ -1,5 +1,5 @@
 import React from 'react';
-import { HardDrive, FolderGit2, History, Users, QrCode, LogOut, Key, Shield, Palette, Languages, Server } from 'lucide-react';
+import { HardDrive, FolderGit2, History, Users, QrCode, LogOut, Key, Shield, Palette, Languages } from 'lucide-react';
 import { useI18n } from '../I18nContext';
 
 export default function Navbar({ user, activeTab, setActiveTab, onLogout, onChangePassword, onOpenLanModal }) {
@@ -11,9 +11,9 @@ export default function Navbar({ user, activeTab, setActiveTab, onLogout, onChan
       <nav className="navbar">
         <div className="nav-brand">
           <div className="nav-brand-icon">
-            <HardDrive size={20} color="white" />
+            <HardDrive size={18} color="white" />
           </div>
-          <span>{t('appName')} <small style={{ fontSize: '0.7rem', opacity: 0.7, fontWeight: 400 }}>{t('appSub')}</small></span>
+          <span>{t('appName')}</span>
         </div>
 
         {/* Desktop Links */}
@@ -35,23 +35,13 @@ export default function Navbar({ user, activeTab, setActiveTab, onLogout, onChan
           </button>
 
           {user.role === 'admin' && (
-            <>
-              <button
-                className={`nav-btn ${activeTab === 'users' ? 'active' : ''}`}
-                onClick={() => setActiveTab('users')}
-              >
-                <Users size={18} />
-                <span>{t('users')}</span>
-              </button>
-
-              <button
-                className={`nav-btn ${activeTab === 'server' ? 'active' : ''}`}
-                onClick={() => setActiveTab('server')}
-              >
-                <Server size={18} color="var(--primary)" />
-                <span>{t('serverAdmin')}</span>
-              </button>
-            </>
+            <button
+              className={`nav-btn ${activeTab === 'users' ? 'active' : ''}`}
+              onClick={() => setActiveTab('users')}
+            >
+              <Users size={18} />
+              <span>{t('users')}</span>
+            </button>
           )}
 
           <button className="nav-btn" onClick={onOpenLanModal} title={t('scanTip')}>
@@ -60,16 +50,15 @@ export default function Navbar({ user, activeTab, setActiveTab, onLogout, onChan
           </button>
         </div>
 
-        {/* User Menu & Settings (Language & DaisyUI Theme Selector) */}
-        <div className="user-menu" style={{ gap: '0.5rem', alignItems: 'center' }}>
-          {/* DaisyUI Theme Selector Dropdown */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }} title={t('theme')}>
-            <Palette size={15} color="var(--primary)" />
+        {/* User Menu & Settings */}
+        <div className="user-menu">
+          {/* DaisyUI Theme Selector */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }} title={t('theme')}>
             <select
-              className="select select-sm select-bordered"
+              className="select select-xs select-bordered"
               value={theme}
               onChange={(e) => setTheme(e.target.value)}
-              style={{ fontSize: '0.8rem', padding: '0.2rem 0.4rem', height: '32px', borderRadius: '6px' }}
+              style={{ fontSize: '0.75rem', padding: '0.1rem 0.3rem', height: '28px', borderRadius: '6px' }}
             >
               {DAISY_THEMES.map(th => (
                 <option key={th} value={th}>
@@ -79,14 +68,13 @@ export default function Navbar({ user, activeTab, setActiveTab, onLogout, onChan
             </select>
           </div>
 
-          {/* Language Selector Dropdown */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }} title={t('language')}>
-            <Languages size={15} color="#06b6d4" />
+          {/* Language Selector */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }} title={t('language')}>
             <select
-              className="select select-sm select-bordered"
+              className="select select-xs select-bordered"
               value={lang}
               onChange={(e) => setLang(e.target.value)}
-              style={{ fontSize: '0.8rem', padding: '0.2rem 0.4rem', height: '32px', borderRadius: '6px' }}
+              style={{ fontSize: '0.75rem', padding: '0.1rem 0.3rem', height: '28px', borderRadius: '6px' }}
             >
               <option value="zh">🇨🇳 简</option>
               <option value="en">🇺🇸 EN</option>
@@ -94,19 +82,19 @@ export default function Navbar({ user, activeTab, setActiveTab, onLogout, onChan
           </div>
 
           <div className="user-badge">
-            <Shield size={14} color={user.role === 'admin' ? '#f43f5e' : '#10b981'} />
-            <span style={{ fontWeight: 600 }}>{user.username}</span>
+            <Shield size={13} color={user.role === 'admin' ? '#f43f5e' : '#10b981'} />
+            <span className="user-badge-name" style={{ fontWeight: 600 }}>{user.username}</span>
             <span className={`role-tag ${user.role}`}>
               {user.role === 'admin' ? t('adminTag') : t('guestTag')}
             </span>
           </div>
 
-          <button className="btn btn-secondary btn-icon" onClick={onChangePassword} title={t('changePass')}>
-            <Key size={15} />
+          <button className="btn btn-secondary btn-icon" onClick={onChangePassword} title={t('changePass')} style={{ padding: '0.3rem' }}>
+            <Key size={14} />
           </button>
 
-          <button className="btn btn-danger btn-icon" onClick={onLogout} title={t('logout')}>
-            <LogOut size={15} />
+          <button className="btn btn-danger btn-icon" onClick={onLogout} title={t('logout')} style={{ padding: '0.3rem' }}>
+            <LogOut size={14} />
           </button>
         </div>
       </nav>
@@ -117,7 +105,7 @@ export default function Navbar({ user, activeTab, setActiveTab, onLogout, onChan
           className={`mobile-tab-btn ${activeTab === 'files' ? 'active' : ''}`}
           onClick={() => setActiveTab('files')}
         >
-          <FolderGit2 size={20} />
+          <FolderGit2 size={19} />
           <span>{t('files')}</span>
         </button>
 
@@ -125,35 +113,25 @@ export default function Navbar({ user, activeTab, setActiveTab, onLogout, onChan
           className={`mobile-tab-btn ${activeTab === 'logs' ? 'active' : ''}`}
           onClick={() => setActiveTab('logs')}
         >
-          <History size={20} />
+          <History size={19} />
           <span>{t('logs')}</span>
         </button>
 
         {user.role === 'admin' && (
-          <>
-            <button
-              className={`mobile-tab-btn ${activeTab === 'users' ? 'active' : ''}`}
-              onClick={() => setActiveTab('users')}
-            >
-              <Users size={20} />
-              <span>{t('users')}</span>
-            </button>
-
-            <button
-              className={`mobile-tab-btn ${activeTab === 'server' ? 'active' : ''}`}
-              onClick={() => setActiveTab('server')}
-            >
-              <Server size={20} color="var(--primary)" />
-              <span>{t('serverAdmin')}</span>
-            </button>
-          </>
+          <button
+            className={`mobile-tab-btn ${activeTab === 'users' ? 'active' : ''}`}
+            onClick={() => setActiveTab('users')}
+          >
+            <Users size={19} />
+            <span>{t('users')}</span>
+          </button>
         )}
 
         <button
           className="mobile-tab-btn"
           onClick={onOpenLanModal}
         >
-          <QrCode size={20} color="#06b6d4" />
+          <QrCode size={19} color="#06b6d4" />
           <span style={{ color: '#06b6d4' }}>{t('scanQr')}</span>
         </button>
       </div>

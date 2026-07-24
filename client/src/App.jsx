@@ -5,7 +5,6 @@ import FileManager from './components/FileManager';
 import DownloadLogs from './components/DownloadLogs';
 import UserManagement from './components/UserManagement';
 import LanInfoModal from './components/LanInfoModal';
-import ServerAdmin from './components/ServerAdmin';
 import { Key, X, Bell, AlertTriangle, Send } from 'lucide-react';
 import { useI18n } from './I18nContext';
 
@@ -231,7 +230,6 @@ export default function App() {
         {activeTab === 'files' && <FileManager user={user} token={token} />}
         {activeTab === 'logs' && <DownloadLogs user={user} token={token} />}
         {activeTab === 'users' && user.role === 'admin' && <UserManagement token={token} currentUser={user} />}
-        {activeTab === 'server' && user.role === 'admin' && <ServerAdmin currentUser={user} token={token} />}
       </main>
 
       {/* LAN ACCESS & QR CODE MODAL */}
