@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
-import { HardDrive, Lock, User, LogIn, ShieldAlert } from 'lucide-react';
+import { HardDrive, Lock, User, LogIn, Palette, Languages } from 'lucide-react';
+import { useI18n } from '../I18nContext';
 
 export default function Login({ onLoginSuccess }) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const { lang, setLang, theme, setTheme, t, DAISY_THEMES } = useI18n();
+  const [username, setUsername] = useState('admin');
+  const [password, setPassword] = useState('admin123');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
+    setError('');
 
     try {
       const res = await fetch('/api/auth/login', {
@@ -18,11 +20,8 @@ export default function Login({ onLoginSuccess }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
       });
-
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || '登录失败');
-      }
+      if (!res.ok) throw new Error(data.error || 'Login failed');
 
       onLoginSuccess(data.token, data.user);
     } catch (err) {
@@ -32,36 +31,77 @@ export default function Login({ onLoginSuccess }) {
     }
   };
 
-  const fillAccount = (user, pass) => {
-    setUsername(user);
-    setPassword(pass);
-  };
-
   return (
     <div style={{
       minHeight: '100vh',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '1rem'
+      padding: '1.5rem',
+      position: 'relative'
     }}>
-      <div className="glass-card" style={{ width: '100%', maxWidth: '420px', padding: '2.5rem 2rem' }}>
+      {/* Top right Quick Theme & Language Selector on Login Page */}
+      <div style={{
+        position: 'absolute',
+        top: '1rem',
+        right: '1rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        background: 'var(--bg-card)',
+        padding: '0.4rem 0.8rem',
+        borderRadius: '8px',
+        border: '1px solid var(--border-color)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+          <Palette size={14} color="var(--primary)" />
+          <select
+            className="select select-sm select-bordered"
+            value={theme}
+            onChange={(e) => setTheme(e.target.value)}
+            style={{ fontSize: '0.78rem', height: '28px', padding: '0 0.3rem' }}
+          >
+            {DAISY_THEMES.map(th => (
+              <option key={th} value={th}>
+                🎨 {th.charAt(0).toUpperCase() + th.slice(1)}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+          <Languages size={14} color="#06b6d4" />
+          <select
+            className="select select-sm select-bordered"
+            value={lang}
+            onChange={(e) => setLang(e.target.value)}
+            style={{ fontSize: '0.78rem', height: '28px', padding: '0 0.3rem' }}
+          >
+            <option value="zh">🇨🇳 简</option>
+            <option value="en">🇺🇸 EN</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="glass-card" style={{ width: '100%', maxWidth: '420px', padding: '2.25rem' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{
-            width: '64px',
-            height: '64px',
-            background: 'linear-gradient(135deg, #6366f1, #06b6d4)',
-            borderRadius: '18px',
+            width: '56px',
+            height: '56px',
+            background: 'linear-gradient(135deg, var(--primary), #06b6d4)',
+            borderRadius: '16px',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            marginBottom: '1rem',
-            boxShadow: '0 0 25px rgba(99, 102, 241, 0.4)'
+            boxShadow: '0 0 20px rgba(99, 102, 241, 0.4)',
+            marginBottom: '1rem'
           }}>
-            <HardDrive size={36} color="white" />
+            <HardDrive size={30} color="white" />
           </div>
-          <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.6rem', fontWeight: 700 }}>LAN-Share 局域网共享</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.25rem' }}>跨平台文件传输与权限控制中心</p>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>{t('loginWelcome')}</h2>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
+            {t('loginSub')}
+          </p>
         </div>
 
         {error && (
@@ -71,83 +111,58 @@ export default function Login({ onLoginSuccess }) {
             color: '#fda4af',
             padding: '0.75rem',
             borderRadius: 'var(--radius-sm)',
-            fontSize: '0.88rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            marginBottom: '1.25rem'
+            marginBottom: '1.25rem',
+            fontSize: '0.85rem',
+            textAlign: 'center'
           }}>
-            <ShieldAlert size={18} />
-            <span>{error}</span>
+            {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label className="form-label">用户名</label>
+            <label className="form-label">{t('usernameLabel')}</label>
             <div style={{ position: 'relative' }}>
               <input
                 type="text"
                 className="form-input"
-                style={{ paddingLeft: '2.5rem' }}
-                placeholder="请输入用户名"
+                style={{ paddingLeft: '2.4rem' }}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
               />
-              <User size={18} color="var(--text-muted)" style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)' }} />
+              <User size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)' }} />
             </div>
           </div>
 
           <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-            <label className="form-label">密码</label>
+            <label className="form-label">{t('passwordLabel')}</label>
             <div style={{ position: 'relative' }}>
               <input
                 type="password"
                 className="form-input"
-                style={{ paddingLeft: '2.5rem' }}
-                placeholder="请输入密码"
+                style={{ paddingLeft: '2.4rem' }}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-              <Lock size={18} color="var(--text-muted)" style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)' }} />
+              <Lock size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)' }} />
             </div>
           </div>
 
           <button
             type="submit"
             className="btn btn-primary"
-            style={{ width: '100%', padding: '0.8rem', fontSize: '1rem' }}
+            style={{ width: '100%', padding: '0.75rem', fontSize: '0.95rem' }}
             disabled={loading}
           >
-            <LogIn size={20} />
-            <span>{loading ? '正在登录...' : '立即登录'}</span>
+            {loading ? 'Logging in...' : t('loginBtn')}
           </button>
         </form>
 
-        <div style={{ marginTop: '1.75rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border-color)' }}>
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem', textAlign: 'center' }}>
-            快速测试账号 (点击直接填入):
-          </div>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              style={{ flex: 1, fontSize: '0.8rem', padding: '0.4rem' }}
-              onClick={() => fillAccount('admin', 'admin123')}
-            >
-              👑 管理员 (admin)
-            </button>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              style={{ flex: 1, fontSize: '0.8rem', padding: '0.4rem' }}
-              onClick={() => fillAccount('guest', 'guest123')}
-            >
-              👤 访客 (guest)
-            </button>
-          </div>
+        <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', fontSize: '0.78rem', color: 'var(--text-dim)', textAlign: 'center' }}>
+          <div>{t('presetAdmin')}</div>
+          <div style={{ marginTop: '0.2rem' }}>{t('presetGuest')}</div>
         </div>
       </div>
     </div>

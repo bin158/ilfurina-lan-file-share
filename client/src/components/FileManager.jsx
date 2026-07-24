@@ -4,6 +4,7 @@ import {
   Download, Eye, Trash2, Upload, FolderPlus, RefreshCw, 
   Search, ChevronRight, Home, X, AlertTriangle, FolderUp
 } from 'lucide-react';
+import { useI18n } from '../I18nContext';
 
 function formatBytes(bytes, decimals = 2) {
   if (bytes === 0) return '0 B';
@@ -30,6 +31,7 @@ function getFileIcon(item, size = 20) {
 }
 
 export default function FileManager({ user, token }) {
+  const { t } = useI18n();
   const [currentPath, setCurrentPath] = useState('');
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -59,7 +61,7 @@ export default function FileManager({ user, token }) {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '获取文件列表失败');
+      if (!res.ok) throw new Error(data.error || 'Failed to list files');
       
       setCurrentPath(data.currentPath);
       setItems(data.items);
@@ -84,7 +86,7 @@ export default function FileManager({ user, token }) {
 
   const handleDownload = (item) => {
     if (!user.can_download) {
-      alert('您没有下载权限');
+      alert(t('permissions'));
       return;
     }
     const downloadUrl = `/api/files/download?path=${encodeURIComponent(item.path)}&token=${encodeURIComponent(token)}`;
@@ -108,7 +110,7 @@ export default function FileManager({ user, token }) {
         const text = await res.text();
         setPreviewTextContent(text.substring(0, 100000));
       } catch (err) {
-        setPreviewTextContent('加载文本失败: ' + err.message);
+        setPreviewTextContent('Failed to load text: ' + err.message);
       }
     }
   };
@@ -126,7 +128,7 @@ export default function FileManager({ user, token }) {
         body: JSON.stringify({ path: currentPath, folderName: newFolderName.trim() })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '创建文件夹失败');
+      if (!res.ok) throw new Error(data.error || 'Failed to create folder');
       
       setShowMkdirModal(false);
       setNewFolderName('');
@@ -136,12 +138,9 @@ export default function FileManager({ user, token }) {
     }
   };
 
-  // Handle File or Folder selection
   const handleFileChange = (e) => {
     const selected = Array.from(e.target.files);
     setUploadFiles(selected);
-
-    // Extract webkitRelativePath for folder upload
     const rels = selected.map(f => f.webkitRelativePath || f.name);
     setRelativePaths(rels);
   };
@@ -164,7 +163,7 @@ export default function FileManager({ user, token }) {
         body: formData
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '上传失败');
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
 
       setShowUploadModal(false);
       setUploadFiles([]);
@@ -185,7 +184,7 @@ export default function FileManager({ user, token }) {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '删除失败');
+      if (!res.ok) throw new Error(data.error || 'Delete failed');
 
       setDeleteTarget(null);
       fetchFiles(currentPath);
@@ -213,7 +212,7 @@ export default function FileManager({ user, token }) {
               style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}
             >
               <Home size={14} />
-              <span>根目录</span>
+              <span>{t('shareRoot')}</span>
             </button>
 
             {pathParts.map((part, index) => {
@@ -239,17 +238,17 @@ export default function FileManager({ user, token }) {
               <>
                 <button className="btn btn-primary" style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }} onClick={() => setShowUploadModal(true)}>
                   <Upload size={15} />
-                  <span>上传文件/文件夹</span>
+                  <span>{t('uploadFile')} / {t('uploadFolder')}</span>
                 </button>
 
                 <button className="btn btn-secondary" style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }} onClick={() => setShowMkdirModal(true)}>
                   <FolderPlus size={15} />
-                  <span>新建目录</span>
+                  <span>{t('newFolder')}</span>
                 </button>
               </>
             )}
 
-            <button className="btn btn-secondary btn-icon" onClick={() => fetchFiles(currentPath)} title="刷新">
+            <button className="btn btn-secondary btn-icon" onClick={() => fetchFiles(currentPath)} title={t('refresh')}>
               <RefreshCw size={15} className={loading ? 'spin' : ''} />
             </button>
           </div>
@@ -262,7 +261,7 @@ export default function FileManager({ user, token }) {
               type="text"
               className="form-input"
               style={{ paddingLeft: '2.1rem', padding: '0.4rem 0.75rem 0.4rem 2.1rem', fontSize: '0.85rem' }}
-              placeholder="搜索当前目录..."
+              placeholder={t('searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -270,7 +269,7 @@ export default function FileManager({ user, token }) {
           </div>
 
           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-            共 <b>{filteredItems.length}</b> 项目
+            {t('itemsCount', { count: filteredItems.length })}
           </div>
         </div>
       </div>
@@ -285,65 +284,37 @@ export default function FileManager({ user, token }) {
       <div className="glass-card" style={{ overflow: 'hidden', padding: '0.5rem' }}>
         {loading ? (
           <div style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-            加载中...
+            Loading...
           </div>
         ) : filteredItems.length === 0 ? (
           <div style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
             <Folder size={40} color="var(--text-dim)" style={{ marginBottom: '0.4rem' }} />
-            <p style={{ fontSize: '0.88rem' }}>该目录下暂无文件</p>
+            <p style={{ fontSize: '0.88rem' }}>{t('emptyFolder')}</p>
           </div>
         ) : (
           <>
-            {/* MOBILE CARDS VIEW (< 768px) */}
+            {/* MOBILE CARDS VIEW */}
             <div className="mobile-file-grid">
               {filteredItems.map((item, idx) => (
-                <div key={idx} className="mobile-file-card">
-                  <div className="mobile-file-info" onClick={() => handleItemClick(item)}>
-                    <div style={{ flexShrink: 0 }}>
-                      {getFileIcon(item, 24)}
-                    </div>
-                    <div style={{ minWidth: 0 }}>
-                      <div className="mobile-file-title" style={{ color: item.isDirectory ? '#60a5fa' : 'var(--text-main)' }}>
-                        {item.name}
-                      </div>
+                <div key={idx} className="mobile-file-card" onClick={() => handleItemClick(item)}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}>
+                    {getFileIcon(item, 24)}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="mobile-file-name">{item.name}</div>
                       <div className="mobile-file-meta">
-                        {item.isDirectory ? '文件夹' : formatBytes(item.size)} • {new Date(item.modifiedAt).toLocaleDateString()}
+                        {item.isDirectory ? t('newFolder') : formatBytes(item.size)} • {new Date(item.mtime).toLocaleDateString()}
                       </div>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flexShrink: 0 }}>
-                    {!item.isDirectory && (
-                      <>
-                        <button
-                          className="btn btn-secondary btn-icon"
-                          style={{ padding: '0.4rem' }}
-                          onClick={() => handlePreview(item)}
-                          title="预览"
-                        >
-                          <Eye size={16} color="#06b6d4" />
-                        </button>
-
-                        {user.can_download && (
-                          <button
-                            className="btn btn-secondary btn-icon"
-                            style={{ padding: '0.4rem', background: 'rgba(16, 185, 129, 0.15)' }}
-                            onClick={() => handleDownload(item)}
-                            title="下载"
-                          >
-                            <Download size={16} color="#10b981" />
-                          </button>
-                        )}
-                      </>
+                  <div style={{ display: 'flex', gap: '0.4rem' }} onClick={(e) => e.stopPropagation()}>
+                    {!item.isDirectory && user.can_download && (
+                      <button className="btn btn-secondary btn-icon" onClick={() => handleDownload(item)} title={t('download')}>
+                        <Download size={16} />
+                      </button>
                     )}
-
                     {user.can_delete && (
-                      <button
-                        className="btn btn-danger btn-icon"
-                        style={{ padding: '0.4rem' }}
-                        onClick={() => setDeleteTarget(item)}
-                        title="删除"
-                      >
+                      <button className="btn btn-danger btn-icon" onClick={() => setDeleteTarget(item)} title={t('delete')}>
                         <Trash2 size={16} />
                       </button>
                     )}
@@ -352,54 +323,42 @@ export default function FileManager({ user, token }) {
               ))}
             </div>
 
-            {/* DESKTOP TABLE VIEW (>= 768px) */}
-            <table className="desktop-file-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
+            {/* DESKTOP TABLE VIEW */}
+            <table className="desktop-table">
               <thead>
-                <tr style={{ background: 'rgba(255, 255, 255, 0.03)', borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)', fontSize: '0.78rem', textTransform: 'uppercase' }}>
-                  <th style={{ padding: '0.8rem 1rem' }}>名称</th>
-                  <th style={{ padding: '0.8rem 1rem', width: '110px' }}>大小</th>
-                  <th style={{ padding: '0.8rem 1rem', width: '170px' }}>修改时间</th>
-                  <th style={{ padding: '0.8rem 1rem', width: '150px', textAlign: 'right' }}>操作</th>
+                <tr>
+                  <th>{t('name')}</th>
+                  <th>{t('size')}</th>
+                  <th>{t('updatedAt')}</th>
+                  <th style={{ textAlign: 'right' }}>{t('actions')}</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredItems.map((item, idx) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)' }}>
-                    <td style={{ padding: '0.8rem 1rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', cursor: 'pointer' }} onClick={() => handleItemClick(item)}>
+                  <tr key={idx} className="file-row" onClick={() => handleItemClick(item)}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
                         {getFileIcon(item)}
-                        <span style={{ fontWeight: item.isDirectory ? 600 : 400, color: item.isDirectory ? '#60a5fa' : 'var(--text-main)' }}>
+                        <span style={{ fontWeight: item.isDirectory ? 600 : 400, color: item.isDirectory ? 'var(--text-main)' : 'var(--text-main)' }}>
                           {item.name}
                         </span>
                       </div>
                     </td>
-
-                    <td style={{ padding: '0.8rem 1rem', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+                    <td style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                       {item.isDirectory ? '-' : formatBytes(item.size)}
                     </td>
-
-                    <td style={{ padding: '0.8rem 1rem', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
-                      {new Date(item.modifiedAt).toLocaleString()}
+                    <td style={{ color: 'var(--text-dim)', fontSize: '0.82rem' }}>
+                      {new Date(item.mtime).toLocaleString()}
                     </td>
-
-                    <td style={{ padding: '0.8rem 1rem', textAlign: 'right' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.3rem' }}>
-                        {!item.isDirectory && (
-                          <>
-                            <button className="btn btn-secondary btn-icon" title="预览" onClick={() => handlePreview(item)}>
-                              <Eye size={15} color="#06b6d4" />
-                            </button>
-
-                            {user.can_download && (
-                              <button className="btn btn-secondary btn-icon" title="下载文件" onClick={() => handleDownload(item)}>
-                                <Download size={15} color="#10b981" />
-                              </button>
-                            )}
-                          </>
+                    <td style={{ textAlign: 'right' }} onClick={(e) => e.stopPropagation()}>
+                      <div style={{ display: 'inline-flex', gap: '0.35rem' }}>
+                        {!item.isDirectory && user.can_download && (
+                          <button className="btn btn-secondary btn-icon" onClick={() => handleDownload(item)} title={t('download')}>
+                            <Download size={15} />
+                          </button>
                         )}
-
                         {user.can_delete && (
-                          <button className="btn btn-danger btn-icon" title="删除" onClick={() => setDeleteTarget(item)}>
+                          <button className="btn btn-danger btn-icon" onClick={() => setDeleteTarget(item)} title={t('delete')}>
                             <Trash2 size={15} />
                           </button>
                         )}
@@ -413,164 +372,118 @@ export default function FileManager({ user, token }) {
         )}
       </div>
 
-      {/* PREVIEW MODAL */}
-      {previewItem && (
-        <div className="modal-overlay" onClick={() => setPreviewItem(null)}>
-          <div className="modal-content" style={{ maxWidth: '800px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: 0 }}>
-                {getFileIcon(previewItem)}
-                <h3 className="modal-title" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{previewItem.name}</h3>
-              </div>
-              <button className="btn btn-secondary btn-icon" onClick={() => setPreviewItem(null)}>
-                <X size={18} />
-              </button>
-            </div>
-
-            <div style={{ maxHeight: '65vh', overflowY: 'auto', background: '#0a0f1d', padding: '0.85rem', borderRadius: 'var(--radius-sm)', textAlign: 'center' }}>
-              {previewItem.mimeType.startsWith('image/') ? (
-                <img
-                  src={`/api/files/preview?path=${encodeURIComponent(previewItem.path)}&token=${encodeURIComponent(token)}`}
-                  alt={previewItem.name}
-                  style={{ maxWidth: '100%', maxHeight: '55vh', borderRadius: '8px', objectFit: 'contain' }}
-                />
-              ) : previewItem.mimeType.startsWith('video/') ? (
-                <video
-                  controls
-                  style={{ width: '100%', maxHeight: '55vh', borderRadius: '8px' }}
-                  src={`/api/files/preview?path=${encodeURIComponent(previewItem.path)}&token=${encodeURIComponent(token)}`}
-                />
-              ) : previewItem.mimeType.startsWith('audio/') ? (
-                <div style={{ padding: '1.5rem' }}>
-                  <audio
-                    controls
-                    style={{ width: '100%' }}
-                    src={`/api/files/preview?path=${encodeURIComponent(previewItem.path)}&token=${encodeURIComponent(token)}`}
-                  />
-                </div>
-              ) : previewTextContent ? (
-                <pre style={{ textAlign: 'left', whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontFamily: 'monospace', fontSize: '0.8rem', color: '#e2e8f0' }}>
-                  {previewTextContent}
-                </pre>
-              ) : (
-                <div style={{ padding: '1.5rem', color: 'var(--text-muted)' }}>
-                  <p style={{ fontSize: '0.88rem' }}>该文件格式不支持在线预览</p>
-                  {user.can_download && (
-                    <button className="btn btn-primary" style={{ marginTop: '0.85rem' }} onClick={() => handleDownload(previewItem)}>
-                      <Download size={15} />
-                      <span>直接下载</span>
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* NEW FOLDER MODAL */}
+      {/* CREATE FOLDER MODAL */}
       {showMkdirModal && (
         <div className="modal-overlay" onClick={() => setShowMkdirModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3 className="modal-title">新建文件夹</h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <FolderPlus size={20} color="var(--primary)" />
+                <h3 className="modal-title">{t('newFolder')}</h3>
+              </div>
               <button className="btn btn-secondary btn-icon" onClick={() => setShowMkdirModal(false)}>
                 <X size={18} />
               </button>
             </div>
+
             <form onSubmit={handleCreateFolder}>
               <div className="form-group">
-                <label className="form-label">文件夹名称</label>
+                <label className="form-label">{t('folderNamePrompt')}</label>
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="例如: Movies, Backup..."
+                  placeholder="MyFolder"
                   value={newFolderName}
                   onChange={(e) => setNewFolderName(e.target.value)}
                   autoFocus
                   required
                 />
               </div>
+
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1.25rem' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setShowMkdirModal(false)}>取消</button>
-                <button type="submit" className="btn btn-primary">确认创建</button>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowMkdirModal(false)}>{t('cancel')}</button>
+                <button type="submit" className="btn btn-primary">{t('save')}</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* UPLOAD FILES & FOLDER MODAL */}
+      {/* UPLOAD MODAL */}
       {showUploadModal && (
         <div className="modal-overlay" onClick={() => setShowUploadModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3 className="modal-title">上传文件或文件夹</h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Upload size={20} color="var(--primary)" />
+                <h3 className="modal-title">{t('uploadFile')} / {t('uploadFolder')}</h3>
+              </div>
               <button className="btn btn-secondary btn-icon" onClick={() => setShowUploadModal(false)}>
                 <X size={18} />
               </button>
             </div>
 
-            {/* Mode Switcher */}
             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem' }}>
               <button
                 type="button"
                 className={`btn ${uploadMode === 'files' ? 'btn-primary' : 'btn-secondary'}`}
                 style={{ flex: 1, fontSize: '0.85rem' }}
-                onClick={() => { setUploadMode('files'); setUploadFiles([]); }}
+                onClick={() => { setUploadMode('files'); setUploadFiles([]); setRelativePaths([]); }}
               >
-                <Upload size={15} />
-                <span>选择单/多个文件</span>
+                <File size={16} />
+                <span>{t('uploadFile')}</span>
               </button>
 
               <button
                 type="button"
                 className={`btn ${uploadMode === 'folder' ? 'btn-primary' : 'btn-secondary'}`}
                 style={{ flex: 1, fontSize: '0.85rem' }}
-                onClick={() => { setUploadMode('folder'); setUploadFiles([]); }}
+                onClick={() => { setUploadMode('folder'); setUploadFiles([]); setRelativePaths([]); }}
               >
-                <FolderUp size={15} />
-                <span>选择完整文件夹</span>
+                <FolderUp size={16} />
+                <span>{t('uploadFolder')}</span>
               </button>
             </div>
 
             <form onSubmit={handleUploadSubmit}>
-              <div className="form-group">
-                <label className="form-label">{uploadMode === 'folder' ? '选择包含多层子目录的文件夹' : '选择要上传的文件'}</label>
-                
-                {uploadMode === 'files' ? (
+              {uploadMode === 'files' ? (
+                <div className="form-group">
+                  <label className="form-label">Select Files</label>
                   <input
-                    ref={fileInputRef}
                     type="file"
-                    multiple
                     className="form-input"
+                    multiple
+                    ref={fileInputRef}
                     onChange={handleFileChange}
                     required
                   />
-                ) : (
+                </div>
+              ) : (
+                <div className="form-group">
+                  <label className="form-label">Select Directory Tree</label>
                   <input
-                    ref={folderInputRef}
                     type="file"
+                    className="form-input"
                     webkitdirectory="true"
                     directory="true"
                     multiple
-                    className="form-input"
+                    ref={folderInputRef}
                     onChange={handleFileChange}
                     required
                   />
-                )}
-              </div>
+                </div>
+              )}
 
               {uploadFiles.length > 0 && (
-                <div style={{ marginTop: '0.6rem', padding: '0.6rem', background: 'rgba(255,255,255,0.04)', borderRadius: '6px', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                  已选定 <b>{uploadFiles.length}</b> 个文件 (保存相对目录树结构)
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                  Ready to upload <b>{uploadFiles.length}</b> file(s).
                 </div>
               )}
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1.25rem' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setShowUploadModal(false)}>取消</button>
-                <button type="submit" className="btn btn-primary" disabled={uploading}>
-                  {uploading ? '上传中...' : '开始上传'}
+                <button type="button" className="btn btn-secondary" onClick={() => setShowUploadModal(false)}>{t('cancel')}</button>
+                <button type="submit" className="btn btn-primary" disabled={uploading || uploadFiles.length === 0}>
+                  {uploading ? 'Uploading...' : t('uploadFile')}
                 </button>
               </div>
             </form>
@@ -578,25 +491,29 @@ export default function FileManager({ user, token }) {
         </div>
       )}
 
-      {/* DELETE CONFIRMATION MODAL */}
+      {/* DELETE CONFIRM MODAL */}
       {deleteTarget && (
         <div className="modal-overlay" onClick={() => setDeleteTarget(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#f43f5e' }}>
-                <AlertTriangle size={18} />
-                <h3 className="modal-title">确认删除</h3>
+            <div className="modal-header" style={{ color: '#f43f5e' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <AlertTriangle size={20} />
+                <h3 className="modal-title">{t('delete')}</h3>
               </div>
               <button className="btn btn-secondary btn-icon" onClick={() => setDeleteTarget(null)}>
                 <X size={18} />
               </button>
             </div>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>
-              确定要删除 <b>{deleteTarget.name}</b> 吗？不可恢复。
+
+            <p style={{ fontSize: '0.9rem', margin: '1rem 0' }}>
+              {t('confirmDelete')}
+              <br />
+              <b style={{ color: 'var(--text-main)', marginTop: '0.5rem', display: 'inline-block' }}>{deleteTarget.name}</b>
             </p>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1.25rem' }}>
-              <button className="btn btn-secondary" onClick={() => setDeleteTarget(null)}>取消</button>
-              <button className="btn btn-danger" onClick={handleDelete}>确认删除</button>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+              <button className="btn btn-secondary" onClick={() => setDeleteTarget(null)}>{t('cancel')}</button>
+              <button className="btn btn-danger" onClick={handleDelete}>{t('delete')}</button>
             </div>
           </div>
         </div>

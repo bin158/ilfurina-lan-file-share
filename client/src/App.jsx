@@ -6,8 +6,10 @@ import DownloadLogs from './components/DownloadLogs';
 import UserManagement from './components/UserManagement';
 import LanInfoModal from './components/LanInfoModal';
 import { Key, X, Bell, AlertTriangle, Send } from 'lucide-react';
+import { useI18n } from './I18nContext';
 
 export default function App() {
+  const { t } = useI18n();
   const [token, setToken] = useState(localStorage.getItem('lan_share_token') || '');
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('files');
@@ -106,9 +108,9 @@ export default function App() {
         body: JSON.stringify({ oldPassword, newPassword })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '修改密码失败');
+      if (!res.ok) throw new Error(data.error || t('passError'));
 
-      setPassSuccess('密码更新成功');
+      setPassSuccess(t('passSuccess'));
       setTimeout(() => {
         setShowPassModal(false);
         setOldPassword('');
@@ -133,7 +135,7 @@ export default function App() {
         },
         body: JSON.stringify({ message: broadcastMsg.trim(), type: 'info' })
       });
-      if (!res.ok) throw new Error('发送广播失败');
+      if (!res.ok) throw new Error(t('sendBroadcastBtn') + ' failed');
 
       setShowBroadcastModal(false);
       setBroadcastMsg('');
@@ -158,7 +160,7 @@ export default function App() {
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-        加载 LAN-Share...
+        Loading LAN-Share...
       </div>
     );
   }
@@ -194,7 +196,7 @@ export default function App() {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
             <Bell size={18} color="#38bdf8" />
-            <span><b>系统广播通知:</b> {systemAlert.message}</span>
+            <span><b>{t('systemNotice')}</b> {systemAlert.message}</span>
           </div>
 
           {user.role === 'admin' && (
@@ -202,9 +204,9 @@ export default function App() {
               className="btn btn-secondary btn-icon"
               style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}
               onClick={handleClearBroadcast}
-              title="撤销广播"
+              title={t('clearBroadcast')}
             >
-              清除广播
+              {t('clearBroadcast')}
             </button>
           )}
         </div>
@@ -219,7 +221,7 @@ export default function App() {
             onClick={() => setShowBroadcastModal(true)}
           >
             <Bell size={14} color="#38bdf8" />
-            <span>发送全局广播 Notification</span>
+            <span>{t('sendBroadcastBtn')}</span>
           </button>
         </div>
       )}
@@ -242,7 +244,7 @@ export default function App() {
             <div className="modal-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Key size={20} color="var(--primary)" />
-                <h3 className="modal-title">修改个人密码</h3>
+                <h3 className="modal-title">{t('changePasswordTitle')}</h3>
               </div>
               <button className="btn btn-secondary btn-icon" onClick={() => setShowPassModal(false)}>
                 <X size={18} />
@@ -254,7 +256,7 @@ export default function App() {
 
             <form onSubmit={handleChangePasswordSubmit}>
               <div className="form-group">
-                <label className="form-label">当前原密码</label>
+                <label className="form-label">{t('currentPassword')}</label>
                 <input
                   type="password"
                   className="form-input"
@@ -265,7 +267,7 @@ export default function App() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">设置新密码</label>
+                <label className="form-label">{t('newPassword')}</label>
                 <input
                   type="password"
                   className="form-input"
@@ -276,8 +278,8 @@ export default function App() {
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1.5rem' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setShowPassModal(false)}>取消</button>
-                <button type="submit" className="btn btn-primary">确认修改</button>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowPassModal(false)}>{t('cancel')}</button>
+                <button type="submit" className="btn btn-primary">{t('confirmChange')}</button>
               </div>
             </form>
           </div>
@@ -291,7 +293,7 @@ export default function App() {
             <div className="modal-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#38bdf8' }}>
                 <Bell size={20} />
-                <h3 className="modal-title">发送全网系统通知/Alert</h3>
+                <h3 className="modal-title">{t('broadcastModalTitle')}</h3>
               </div>
               <button className="btn btn-secondary btn-icon" onClick={() => setShowBroadcastModal(false)}>
                 <X size={18} />
@@ -300,11 +302,11 @@ export default function App() {
 
             <form onSubmit={handleSendBroadcast}>
               <div className="form-group">
-                <label className="form-label">系统广播内容 (所有在线用户均可实时看到)</label>
+                <label className="form-label">{t('broadcastLabel')}</label>
                 <textarea
                   className="form-input"
                   style={{ height: '90px', resize: 'vertical' }}
-                  placeholder="例如: 欢迎访问 LAN-Share！系统将于 22:00 进行临时保养..."
+                  placeholder={t('broadcastPlaceholder')}
                   value={broadcastMsg}
                   onChange={(e) => setBroadcastMsg(e.target.value)}
                   required
@@ -312,10 +314,10 @@ export default function App() {
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1.25rem' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setShowBroadcastModal(false)}>取消</button>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowBroadcastModal(false)}>{t('cancel')}</button>
                 <button type="submit" className="btn btn-primary">
                   <Send size={15} />
-                  <span>发布广播</span>
+                  <span>{t('send')}</span>
                 </button>
               </div>
             </form>

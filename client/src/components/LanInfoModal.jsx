@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { QrCode, Copy, Check, X, Wifi, Monitor, HardDrive } from 'lucide-react';
+import { QrCode, Copy, Check, X, Wifi } from 'lucide-react';
+import { useI18n } from '../I18nContext';
 
 export default function LanInfoModal({ token, onClose }) {
+  const { t } = useI18n();
   const [lanData, setLanData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [copiedIndex, setCopiedIndex] = useState(null);
@@ -31,7 +33,7 @@ export default function LanInfoModal({ token, onClose }) {
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#06b6d4' }}>
             <Wifi size={22} />
-            <h3 className="modal-title">局域网接入 & 手机扫码</h3>
+            <h3 className="modal-title">{t('lanModalTitle')}</h3>
           </div>
           <button className="btn btn-secondary btn-icon" onClick={onClose}>
             <X size={18} />
@@ -40,7 +42,7 @@ export default function LanInfoModal({ token, onClose }) {
 
         {loading ? (
           <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-            正在检测局域网 IP...
+            Loading LAN IP...
           </div>
         ) : lanData ? (
           <div>
@@ -53,13 +55,13 @@ export default function LanInfoModal({ token, onClose }) {
                 />
               )}
               <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.75rem' }}>
-                📱 手机 / 平板连接同一 WiFi 后扫码直接打开
+                📱 {t('scanTip')}
               </p>
             </div>
 
             <div style={{ marginBottom: '1rem' }}>
               <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem', fontWeight: 500 }}>
-                同局域网设备浏览器访问地址 (IPv4):
+                {t('currentIpLabel')}
               </div>
 
               {lanData.lanIps.map((item, idx) => {
@@ -79,7 +81,7 @@ export default function LanInfoModal({ token, onClose }) {
                     }}
                   >
                     <div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>网卡: {item.interface}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Nic: {item.interface}</div>
                       <div style={{ fontWeight: 600, color: '#38bdf8', fontFamily: 'monospace', fontSize: '0.95rem' }}>
                         {url}
                       </div>
@@ -88,7 +90,7 @@ export default function LanInfoModal({ token, onClose }) {
                     <button
                       className="btn btn-secondary btn-icon"
                       onClick={() => handleCopy(url, idx)}
-                      title="复制地址"
+                      title={t('copyLink')}
                     >
                       {copiedIndex === idx ? <Check size={16} color="#10b981" /> : <Copy size={16} />}
                     </button>
@@ -98,12 +100,12 @@ export default function LanInfoModal({ token, onClose }) {
             </div>
 
             <div style={{ display: 'flex', gap: '1rem', background: 'rgba(255,255,255,0.02)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: 'var(--text-dim)' }}>
-              <div>主机名: <b style={{ color: 'var(--text-muted)' }}>{lanData.hostname}</b></div>
-              <div>操作系统: <b style={{ color: 'var(--text-muted)' }}>{lanData.platform} ({lanData.arch})</b></div>
+              <div>Host: <b style={{ color: 'var(--text-muted)' }}>{lanData.hostname}</b></div>
+              <div>OS: <b style={{ color: 'var(--text-muted)' }}>{lanData.platform} ({lanData.arch})</b></div>
             </div>
           </div>
         ) : (
-          <div style={{ padding: '1rem', color: '#fda4af' }}>获取局域网地址失败</div>
+          <div style={{ padding: '1rem', color: '#fda4af' }}>Failed to load LAN addresses</div>
         )}
       </div>
     </div>

@@ -1,11 +1,14 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <title>LAN-Share Server Admin Desktop Panel</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- DaisyUI 4 CSS & Tailwind CDN for complete DaisyUI 32 themes -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@4.12.14/dist/full.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root {
       --bg-dark: #0b0f19;
@@ -18,6 +21,16 @@
       --cyan: #06b6d4;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
+    }
+
+    [data-theme] {
+      --bg-dark: hsl(var(--b1));
+      --bg-card: hsl(var(--b2));
+      --border-color: hsl(var(--bc) / 0.12);
+      --primary: hsl(var(--p));
+      --primary-hover: hsl(var(--pf, var(--p)));
+      --text-main: hsl(var(--bc));
+      --text-muted: hsl(var(--bc) / 0.7);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -33,9 +46,9 @@
     }
 
     .topbar {
-      background: #0f172a;
+      background: hsl(var(--b2) / 0.95);
       border-bottom: 1px solid var(--border-color);
-      padding: 0.85rem 1.5rem;
+      padding: 0.75rem 1.25rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -46,7 +59,7 @@
       align-items: center;
       gap: 0.75rem;
       font-family: 'Outfit', sans-serif;
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       font-weight: 700;
     }
     .brand-icon {
@@ -111,14 +124,14 @@
     .btn-stop { background: #f43f5e; color: white; }
     .btn-stop:hover { background: #e11d48; }
     .btn-primary { background: var(--primary); color: white; }
-    .btn-secondary { background: rgba(255,255,255,0.06); color: white; border-color: var(--border-color); }
+    .btn-secondary { background: rgba(255,255,255,0.06); color: var(--text-main); border-color: var(--border-color); }
     .btn-secondary:hover { background: rgba(255,255,255,0.12); }
 
     .nav-tabs {
       display: flex;
-      background: #0d1322;
+      background: hsl(var(--b2) / 0.7);
       border-bottom: 1px solid var(--border-color);
-      padding: 0 1.5rem;
+      padding: 0 1.25rem;
     }
     .tab-btn {
       padding: 0.85rem 1.25rem;
@@ -201,7 +214,7 @@
 
     .form-group {
       display: flex;
-      flex-direction: column;
+      flex-direction: flex-column;
       gap: 0.35rem;
       margin-bottom: 1rem;
     }
@@ -228,7 +241,7 @@
       justify-content: center;
     }
     .modal-content {
-      background: #111827;
+      background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: 12px;
       padding: 1.5rem;
@@ -243,29 +256,40 @@
     <div class="brand">
       <div class="brand-icon">📁</div>
       <div>
-        LAN-Share 服务端桌面管理面板
-        <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 400;">Server Control Center</div>
+        <span data-i18n="serverAdminTitle">LAN-Share 服务端桌面管理面板</span>
+        <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 400;" data-i18n="serverControlCenter">Server Control Center</div>
       </div>
     </div>
 
     <div class="controls-bar">
+      <!-- DaisyUI Theme Dropdown -->
+      <select id="guiThemeSelect" class="select select-sm select-bordered" onchange="changeGuiTheme(this.value)" style="font-size: 0.8rem; height: 32px; padding: 0 0.4rem;">
+        <!-- Filled dynamically by JavaScript -->
+      </select>
+
+      <!-- i18n Language Dropdown -->
+      <select id="guiLangSelect" class="select select-sm select-bordered" onchange="changeGuiLang(this.value)" style="font-size: 0.8rem; height: 32px; padding: 0 0.4rem;">
+        <option value="zh">🇨🇳 简</option>
+        <option value="en">🇺🇸 EN</option>
+      </select>
+
       <div id="statusPill" class="status-pill online">
         <span id="statusDot" class="dot online"></span>
         <span id="statusText">检测服务器连接中...</span>
       </div>
 
-      <button id="btnStart" class="btn btn-start" style="display:none;" onclick="startServer()">▶ 启动服务器</button>
-      <button id="btnStop" class="btn btn-stop" onclick="stopServer()">⏹ 停止服务器</button>
-      <button class="btn btn-secondary" onclick="openStorageFolder()">📂 打开共享文件夹</button>
+      <button id="btnStart" class="btn btn-start" style="display:none;" onclick="startServer()" data-i18n="startServerBtn">▶ 启动服务器</button>
+      <button id="btnStop" class="btn btn-stop" onclick="stopServer()" data-i18n="stopServerBtn">⏹ 停止服务器</button>
+      <button class="btn btn-secondary" onclick="openStorageFolder()" data-i18n="openShareFolderBtn">📂 打开共享文件夹</button>
     </div>
   </div>
 
   <!-- Navigation Tabs -->
   <div class="nav-tabs">
-    <button class="tab-btn active" onclick="switchTab('overview')">📊 运行概览与终端日志</button>
-    <button class="tab-btn" onclick="switchTab('users')">👥 用户管理与编辑</button>
-    <button class="tab-btn" onclick="switchTab('logs')">📜 实时下载日志追溯</button>
-    <button class="tab-btn" onclick="switchTab('broadcast')">📢 向用户发送 Alert 广播</button>
+    <button id="tabBtnOverview" class="tab-btn active" onclick="switchTab('overview')" data-i18n="tabOverview">📊 运行概览与终端日志</button>
+    <button id="tabBtnUsers" class="tab-btn" onclick="switchTab('users')" data-i18n="tabUsers">👥 用户管理与编辑</button>
+    <button id="tabBtnLogs" class="tab-btn" onclick="switchTab('logs')" data-i18n="tabLogs">📜 实时下载日志追溯</button>
+    <button id="tabBtnBroadcast" class="tab-btn" onclick="switchTab('broadcast')" data-i18n="tabBroadcast">📢 向用户发送 Alert 广播</button>
   </div>
 
   <!-- Content Area -->
@@ -277,45 +301,45 @@
         <div>
           <!-- LAN IP Cards -->
           <div class="card" style="margin-bottom: 1rem;">
-            <div class="card-title">🌐 局域网实际接入地址 (Primary LAN IP)</div>
+            <div class="card-title" data-i18n="lanPrimaryIp">🌐 局域网实际接入地址 (Primary LAN IP)</div>
             <div id="lanIpList">
-              <div style="color: var(--text-muted); font-size: 0.85rem;">检测网卡 IP 中...</div>
+              <div style="color: var(--text-muted); font-size: 0.85rem;" data-i18n="detectingNetwork">检测网卡 IP 中...</div>
             </div>
 
             <div style="text-align: center; margin-top: 1.25rem;">
               <img id="qrCodeImg" style="width: 150px; height: 150px; border-radius: 8px; background: white; padding: 6px; display: none;" />
-              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem;">📱 手机扫码直连下载</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem;" data-i18n="mobileScanTip">📱 手机扫码直连下载</div>
             </div>
           </div>
 
           <!-- Custom Shared Storage Directory Config -->
           <div class="card" style="margin-bottom: 1rem;">
-            <div class="card-title">📁 自定义共享文件夹路径</div>
+            <div class="card-title" data-i18n="customSharePathTitle">📁 自定义共享文件夹路径</div>
             <div class="form-group">
-              <label class="form-label">绝对路径 (Linux / Windows)</label>
+              <label class="form-label" data-i18n="pathRangeLabel">绝对路径 (Linux / Windows)</label>
               <input type="text" id="sharedFolderInput" class="form-input" placeholder="例如: /home/user/share 或 C:\MyShare" />
             </div>
-            <button class="btn btn-primary" style="width: 100%;" onclick="updateSharedFolder()">保存/应用自定义共享文件夹</button>
+            <button class="btn btn-primary" style="width: 100%;" onclick="updateSharedFolder()" data-i18n="applySharePathBtn">保存/应用自定义共享文件夹</button>
           </div>
 
           <!-- Quick Config -->
           <div class="card">
-            <div class="card-title">⚙️ 端口配置</div>
+            <div class="card-title" data-i18n="portConfigTitle">⚙️ 端口配置</div>
             <div class="form-group">
-              <label class="form-label">监听端口 (Default: 3000)</label>
+              <label class="form-label" data-i18n="portInputLabel">监听端口 (Default: 3000)</label>
               <input type="number" id="portInput" class="form-input" value="3000" />
             </div>
-            <button class="btn btn-secondary" style="width: 100%;" onclick="changePort()">重启并应用端口</button>
+            <button class="btn btn-secondary" style="width: 100%;" onclick="changePort()" data-i18n="applyPortBtn">重启并应用端口</button>
           </div>
         </div>
 
         <!-- Terminal Console -->
         <div class="card">
           <div class="card-title">
-            <span>💻 实时服务端控制台日志</span>
+            <span data-i18n="liveConsoleTitle">💻 实时服务端控制台日志</span>
             <div>
-              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" onclick="copyConsoleLogs()">📋 复制日志</button>
-              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" onclick="clearConsole()">清屏</button>
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" onclick="copyConsoleLogs()" data-i18n="copyLogsBtn">📋 复制日志</button>
+              <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" onclick="clearConsole()" data-i18n="clearConsoleBtn">清屏</button>
             </div>
           </div>
           <div id="terminalConsole" class="terminal-window"></div>
@@ -327,26 +351,26 @@
     <div id="tab-users" class="tab-pane">
       <div class="card">
         <div class="card-title">
-          <span>👥 用户列表与细粒度权限编辑</span>
-          <button class="btn btn-start" onclick="showAddUserModal()">+ 添加新用户</button>
+          <span data-i18n="usersListTitle">👥 用户列表与细粒度权限编辑</span>
+          <button class="btn btn-start" onclick="showAddUserModal()" data-i18n="addUserBtn">+ 添加新用户</button>
         </div>
         <table>
           <thead>
             <tr>
               <th>ID</th>
-              <th>用户名</th>
-              <th>角色</th>
-              <th>下载</th>
-              <th>上传</th>
-              <th>删除</th>
-              <th>路径范围</th>
-              <th>下载次数</th>
-              <th>状态</th>
-              <th style="text-align:right;">操作</th>
+              <th data-i18n="username">用户名</th>
+              <th data-i18n="role">角色</th>
+              <th data-i18n="downloadPerm">下载</th>
+              <th data-i18n="uploadPerm">上传</th>
+              <th data-i18n="deletePerm">删除</th>
+              <th data-i18n="pathRange">路径范围</th>
+              <th data-i18n="downloadCount">下载次数</th>
+              <th data-i18n="status">状态</th>
+              <th style="text-align:right;" data-i18n="actions">操作</th>
             </tr>
           </thead>
           <tbody id="userTableBody">
-            <tr><td colspan="10" style="text-align:center; padding: 2rem; color: var(--text-muted);">加载用户数据...</td></tr>
+            <tr><td colspan="10" style="text-align:center; padding: 2rem; color: var(--text-muted);" data-i18n="loadingUsers">加载用户数据...</td></tr>
           </tbody>
         </table>
       </div>
@@ -356,26 +380,26 @@
     <div id="tab-logs" class="tab-pane">
       <div class="card">
         <div class="card-title">
-          <span>📜 下载日志审计记录</span>
+          <span data-i18n="logsListTitle">📜 下载日志审计记录</span>
           <div>
-            <button class="btn btn-secondary" style="font-size: 0.78rem;" onclick="copyTableLogs()">📋 复制日志数据</button>
-            <button class="btn btn-stop" style="font-size: 0.78rem;" onclick="clearServerLogs()">清空历史日志</button>
+            <button class="btn btn-secondary" style="font-size: 0.78rem;" onclick="copyTableLogs()" data-i18n="copyTableLogsBtn">📋 复制日志数据</button>
+            <button class="btn btn-stop" style="font-size: 0.78rem;" onclick="clearServerLogs()" data-i18n="clearServerLogsBtn">清空历史日志</button>
           </div>
         </div>
         <table>
           <thead>
             <tr>
               <th>ID</th>
-              <th>下载用户</th>
-              <th>文件名</th>
-              <th>相对路径</th>
-              <th>大小</th>
-              <th>客户端 IP</th>
-              <th>下载时间</th>
+              <th data-i18n="downloadUser">下载用户</th>
+              <th data-i18n="filename">文件名</th>
+              <th data-i18n="relPath">相对路径</th>
+              <th data-i18n="size">大小</th>
+              <th data-i18n="clientIp">客户端 IP</th>
+              <th data-i18n="downloadTime">下载时间</th>
             </tr>
           </thead>
           <tbody id="logsTableBody">
-            <tr><td colspan="7" style="text-align:center; padding: 2rem; color: var(--text-muted);">加载日志记录...</td></tr>
+            <tr><td colspan="7" style="text-align:center; padding: 2rem; color: var(--text-muted);" data-i18n="loadingLogs">加载日志记录...</td></tr>
           </tbody>
         </table>
       </div>
@@ -384,16 +408,16 @@
     <!-- TAB 4: BROADCAST ALERT -->
     <div id="tab-broadcast" class="tab-pane">
       <div class="card" style="max-width: 600px; margin: 0 auto;">
-        <div class="card-title">📢 向所有登录 Web 用户发送 Alert 广播</div>
+        <div class="card-title" data-i18n="broadcastAlertTitle">📢 向所有登录 Web 用户发送 Alert 广播</div>
         
         <div className="form-group" style="margin-bottom: 1rem;">
-          <label class="form-label">广播 Notification 文本内容</label>
-          <textarea id="broadcastInput" class="form-input" style="height: 100px; resize: vertical;" placeholder="例如: 欢迎使用 LAN-Share 文件共享！系统将在 10 分钟后例行维护..."></textarea>
+          <label class="form-label" data-i18n="broadcastTextLabel">广播 Notification 文本内容</label>
+          <textarea id="broadcastInput" class="form-input" style="height: 100px; resize: vertical;" placeholder="e.g. Welcome to LAN-Share! Maintenance in 10 minutes..."></textarea>
         </div>
 
         <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-          <button class="btn btn-stop" onclick="clearBroadcastGui()">撤销广播</button>
-          <button class="btn btn-start" onclick="sendBroadcastGui()">🚀 立即发布广播 Notification</button>
+          <button class="btn btn-stop" onclick="clearBroadcastGui()" data-i18n="revokeBroadcastBtn">撤销广播</button>
+          <button class="btn btn-start" onclick="sendBroadcastGui()" data-i18n="publishBroadcastBtn">🚀 立即发布广播 Notification</button>
         </div>
       </div>
     </div>
@@ -403,52 +427,53 @@
   <!-- EDIT USER MODAL -->
   <div id="userModal" class="modal-overlay" style="display:none;">
     <div class="modal-content">
-      <h3 id="modalUserTitle" style="margin-bottom:1rem; font-size:1.1rem;">编辑用户信息</h3>
+      <h3 id="modalUserTitle" style="margin-bottom:1rem; font-size:1.1rem;" data-i18n="editUserTitle">编辑用户信息</h3>
       <input type="hidden" id="editUserId" />
       
       <div class="form-group">
-        <label class="form-label">用户名</label>
+        <label class="form-label" data-i18n="username">用户名</label>
         <input type="text" id="editUsername" class="form-input" />
       </div>
 
       <div class="form-group">
-        <label class="form-label">重置密码 (留空保持原密码)</label>
+        <label class="form-label" data-i18n="resetPassPlaceholder">重置密码 (留空保持原密码)</label>
         <input type="password" id="editPassword" class="form-input" placeholder="输入新密码" />
       </div>
 
       <div class="form-group">
-        <label class="form-label">角色</label>
+        <label class="form-label" data-i18n="role">角色</label>
         <select id="editRole" class="form-input">
-          <option value="user">普通用户 (user)</option>
-          <option value="admin">系统管理员 (admin)</option>
+          <option value="user" data-i18n="user">普通用户 (user)</option>
+          <option value="admin" data-i18n="admin">系统管理员 (admin)</option>
         </select>
       </div>
 
       <div class="form-group">
-        <label class="form-label">细粒度功能权限</label>
+        <label class="form-label" data-i18n="permissions">细粒度功能权限</label>
         <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; cursor:pointer;">
-          <input type="checkbox" id="editCanDownload" /> 允许下载文件 (Can Download)
+          <input type="checkbox" id="editCanDownload" /> <span data-i18n="canDownloadText">允许下载文件 (Can Download)</span>
         </label>
         <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; cursor:pointer;">
-          <input type="checkbox" id="editCanUpload" /> 允许上传文件/文件夹 (Can Upload)
+          <input type="checkbox" id="editCanUpload" /> <span data-i18n="canUploadText">允许上传文件/文件夹 (Can Upload)</span>
         </label>
         <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; cursor:pointer;">
-          <input type="checkbox" id="editCanDelete" /> 允许删除文件/目录 (Can Delete)
+          <input type="checkbox" id="editCanDelete" /> <span data-i18n="canDeleteText">允许删除文件/目录 (Can Delete)</span>
         </label>
       </div>
 
       <div class="form-group">
-        <label class="form-label">允许访问的路径范围 (* 代表全部)</label>
+        <label class="form-label" data-i18n="pathRangeLabel">允许访问的路径范围 (* 代表全部)</label>
         <input type="text" id="editAllowedPaths" class="form-input" value="*" />
       </div>
 
       <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1.25rem;">
-        <button class="btn btn-secondary" onclick="closeUserModal()">取消</button>
-        <button class="btn btn-start" onclick="saveUserGui()">保存设置</button>
+        <button class="btn btn-secondary" onclick="closeUserModal()" data-i18n="cancel">取消</button>
+        <button class="btn btn-start" onclick="saveUserGui()" data-i18n="save">保存设置</button>
       </div>
     </div>
   </div>
 
+  <script src="i18n.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

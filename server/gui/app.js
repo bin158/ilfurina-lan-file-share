@@ -3,6 +3,49 @@ const { ipcRenderer, clipboard } = require('electron');
 let currentPort = 3000;
 let primaryLanIp = '127.0.0.1';
 let cachedLogsData = [];
+let currentGuiLang = localStorage.getItem('lan_share_lang') || 'zh';
+
+function initThemeSelector() {
+  const select = document.getElementById('guiThemeSelect');
+  if (select && typeof DAISY_THEMES !== 'undefined') {
+    const currentTheme = localStorage.getItem('lan_share_theme') || 'dark';
+    select.innerHTML = DAISY_THEMES.map(th => 
+      `<option value="${th}" ${th === currentTheme ? 'selected' : ''}>🎨 ${th.charAt(0).toUpperCase() + th.slice(1)}</option>`
+    ).join('');
+    document.documentElement.setAttribute('data-theme', currentTheme);
+  }
+  const langSelect = document.getElementById('guiLangSelect');
+  if (langSelect) {
+    langSelect.value = currentGuiLang;
+  }
+}
+
+window.changeGuiTheme = function(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('lan_share_theme', theme);
+};
+
+window.changeGuiLang = function(lang) {
+  currentGuiLang = lang;
+  localStorage.setItem('lan_share_lang', lang);
+  updateGuiTexts();
+};
+
+function updateGuiTexts() {
+  if (typeof guiTranslations === 'undefined') return;
+  const dict = guiTranslations[currentGuiLang] || guiTranslations.zh;
+  document.querySelectorAll('[data-i18n]').forEach(elem => {
+    const key = elem.getAttribute('data-i18n');
+    if (dict[key]) {
+      elem.textContent = dict[key];
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initThemeSelector();
+  updateGuiTexts();
+});
 
 // Tab Switching
 window.switchTab = function(tabName) {
