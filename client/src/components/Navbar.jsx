@@ -50,34 +50,37 @@ export default function Navbar({ user, activeTab, setActiveTab, onLogout, onChan
           </button>
         </div>
 
-        {/* User Menu & Settings */}
+        {/* User Menu & Settings (Theme & Language grouped together) */}
         <div className="user-menu">
-          {/* DaisyUI Theme Selector */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }} title={t('theme')}>
+          {/* Combined Theme & Language Settings Group */}
+          <div className="settings-group" style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.15rem 0.3rem' }}>
+            <Palette size={13} color="var(--primary)" />
             <select
-              className="select select-xs select-bordered"
+              className="select select-xs"
               value={theme}
               onChange={(e) => setTheme(e.target.value)}
-              style={{ fontSize: '0.75rem', padding: '0.1rem 0.3rem', height: '28px', borderRadius: '6px' }}
+              style={{ fontSize: '0.75rem', padding: '0.1rem 0.2rem', height: '26px', border: 'none', background: 'transparent', cursor: 'pointer' }}
+              title={t('theme')}
             >
               {DAISY_THEMES.map(th => (
-                <option key={th} value={th}>
+                <option key={th} value={th} style={{ background: 'var(--bg-secondary)', color: 'var(--text-main)' }}>
                   🎨 {th.charAt(0).toUpperCase() + th.slice(1)}
                 </option>
               ))}
             </select>
-          </div>
 
-          {/* Language Selector */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }} title={t('language')}>
+            <span style={{ color: 'var(--border-color)', opacity: 0.4, fontSize: '0.7rem' }}>|</span>
+
+            <Languages size={13} color="#06b6d4" />
             <select
-              className="select select-xs select-bordered"
+              className="select select-xs"
               value={lang}
               onChange={(e) => setLang(e.target.value)}
-              style={{ fontSize: '0.75rem', padding: '0.1rem 0.3rem', height: '28px', borderRadius: '6px' }}
+              style={{ fontSize: '0.75rem', padding: '0.1rem 0.2rem', height: '26px', border: 'none', background: 'transparent', cursor: 'pointer' }}
+              title={t('language')}
             >
-              <option value="zh">🇨🇳 简</option>
-              <option value="en">🇺🇸 EN</option>
+              <option value="zh" style={{ background: 'var(--bg-secondary)', color: 'var(--text-main)' }}>🇨🇳 简</option>
+              <option value="en" style={{ background: 'var(--bg-secondary)', color: 'var(--text-main)' }}>🇺🇸 EN</option>
             </select>
           </div>
 

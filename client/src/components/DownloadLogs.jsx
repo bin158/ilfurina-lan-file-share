@@ -11,6 +11,26 @@ function formatBytes(bytes, decimals = 2) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
+function formatDate(dateVal, includeTime = true) {
+  if (!dateVal) return '-';
+  let str = String(dateVal);
+  if (typeof dateVal === 'string' && dateVal.includes(' ') && !dateVal.includes('T')) {
+    str = str.replace(' ', 'T');
+  }
+  const d = new Date(str);
+  if (isNaN(d.getTime())) {
+    const num = Number(dateVal);
+    if (!isNaN(num)) {
+      const dNum = new Date(num);
+      if (!isNaN(dNum.getTime())) {
+        return includeTime ? dNum.toLocaleString() : dNum.toLocaleDateString();
+      }
+    }
+    return '-';
+  }
+  return includeTime ? d.toLocaleString() : d.toLocaleDateString();
+}
+
 export default function DownloadLogs({ user, token }) {
   const { t } = useI18n();
   const [logs, setLogs] = useState([]);
@@ -88,7 +108,7 @@ export default function DownloadLogs({ user, token }) {
 
       <div className="glass-card" style={{ overflow: 'hidden', padding: '0.5rem' }}>
         {loading ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
+          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>{t('loading')}</div>
         ) : logs.length === 0 ? (
           <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
             <History size={36} color="var(--text-dim)" style={{ marginBottom: '0.4rem' }} />
@@ -106,7 +126,7 @@ export default function DownloadLogs({ user, token }) {
                       <span>{log.username}</span>
                     </div>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>
-                      {new Date(log.downloaded_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {formatDate(log.downloaded_at, true)}
                     </span>
                   </div>
 
@@ -161,7 +181,7 @@ export default function DownloadLogs({ user, token }) {
                       </div>
                     </td>
                     <td style={{ color: 'var(--text-dim)', fontSize: '0.82rem' }}>
-                      {new Date(log.downloaded_at).toLocaleString()}
+                      {formatDate(log.downloaded_at, true)}
                     </td>
                   </tr>
                 ))}

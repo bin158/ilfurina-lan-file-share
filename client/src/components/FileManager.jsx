@@ -15,6 +15,26 @@ function formatBytes(bytes, decimals = 2) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
+function formatDate(dateVal, includeTime = true) {
+  if (!dateVal) return '-';
+  let str = String(dateVal);
+  if (typeof dateVal === 'string' && dateVal.includes(' ') && !dateVal.includes('T')) {
+    str = str.replace(' ', 'T');
+  }
+  const d = new Date(str);
+  if (isNaN(d.getTime())) {
+    const num = Number(dateVal);
+    if (!isNaN(num)) {
+      const dNum = new Date(num);
+      if (!isNaN(dNum.getTime())) {
+        return includeTime ? dNum.toLocaleString() : dNum.toLocaleDateString();
+      }
+    }
+    return '-';
+  }
+  return includeTime ? d.toLocaleString() : d.toLocaleDateString();
+}
+
 function getFileIcon(item, size = 20) {
   if (item.isDirectory) return <Folder size={size} color="#f59e0b" />;
   const mime = item.mimeType || '';
@@ -406,7 +426,7 @@ export default function FileManager({ user, token }) {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div className="mobile-file-name">{item.name}</div>
                       <div className="mobile-file-meta">
-                        {item.isDirectory ? t('newFolder') : formatBytes(item.size)} • {new Date(item.mtime).toLocaleDateString()}
+                        {item.isDirectory ? t('newFolder') : formatBytes(item.size)} • {formatDate(item.mtime, false)}
                       </div>
                     </div>
                   </div>
@@ -452,7 +472,7 @@ export default function FileManager({ user, token }) {
                       {item.isDirectory ? '-' : formatBytes(item.size)}
                     </td>
                     <td style={{ color: 'var(--text-dim)', fontSize: '0.82rem' }}>
-                      {new Date(item.mtime).toLocaleString()}
+                      {formatDate(item.mtime, true)}
                     </td>
                     <td style={{ textAlign: 'right' }} onClick={(e) => e.stopPropagation()}>
                       <div style={{ display: 'inline-flex', gap: '0.35rem' }}>

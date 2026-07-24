@@ -9,7 +9,7 @@ export const DAISY_THEMES = [
 export const translations = {
   zh: {
     // App & Nav
-    appName: "LAN-Share",
+    appName: "ilfurina lan-share",
     appSub: "局域网共享",
     files: "文件浏览",
     logs: "下载日志",
@@ -166,7 +166,7 @@ export const translations = {
   },
   en: {
     // App & Nav
-    appName: "LAN-Share",
+    appName: "ilfurina lan-share",
     appSub: "LAN File Sharing",
     files: "Files",
     logs: "Logs",

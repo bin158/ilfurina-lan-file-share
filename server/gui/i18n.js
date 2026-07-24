@@ -8,7 +8,7 @@ const DAISY_THEMES = [
 
 const guiTranslations = {
   zh: {
-    serverAdminTitle: "LAN-Share 服务端桌面管理面板",
+    serverAdminTitle: "ilfurina lan-share 服务端桌面管理面板",
     serverControlCenter: "Server Control Center",
     serverOnline: "服务器在线",
     serverOffline: "服务器已停止",
@@ -92,7 +92,7 @@ const guiTranslations = {
     timesUnit: "次"
   },
   en: {
-    serverAdminTitle: "LAN-Share Server Admin Desktop Panel",
+    serverAdminTitle: "ilfurina lan-share Server Admin Desktop Panel",
     serverControlCenter: "Server Control Center",
     serverOnline: "Server Online",
     serverOffline: "Server Stopped",
