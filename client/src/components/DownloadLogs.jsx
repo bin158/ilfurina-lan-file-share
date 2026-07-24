@@ -37,8 +37,8 @@ export default function DownloadLogs({ user, token }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const fetchLogs = async () => {
-    setLoading(true);
+  const fetchLogs = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     setError('');
     try {
       const res = await fetch('/api/logs?page=1&limit=100', {
@@ -48,14 +48,18 @@ export default function DownloadLogs({ user, token }) {
       if (!res.ok) throw new Error(data.error || 'Failed to fetch logs');
       setLogs(data.logs || []);
     } catch (err) {
-      setError(err.message);
+      if (!isSilent) setError(err.message);
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchLogs();
+    const interval = setInterval(() => {
+      fetchLogs(true);
+    }, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleClearLogs = async () => {
@@ -74,19 +78,25 @@ export default function DownloadLogs({ user, token }) {
 
   return (
     <div>
-      <div className="glass-card" style={{ padding: '0.85rem 1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.6rem' }}>
+      {/* Section Header */}
+      <div className="glass-card section-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <div style={{ background: 'rgba(99, 102, 241, 0.15)', border: '1px solid rgba(99, 102, 241, 0.3)', width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: 'rgba(99, 102, 241, 0.15)', border: '1px solid rgba(99, 102, 241, 0.3)', width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <History size={18} color="var(--primary)" />
           </div>
-          <div>
+          <div style={{ minWidth: 0 }}>
             <h3 style={{ fontSize: '0.98rem', fontWeight: 600 }}>{t('logsTitle')}</h3>
             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('logsSubtitle')}</p>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.4rem' }}>
-          <button className="btn btn-secondary" onClick={fetchLogs}>
+        <div className="section-header-actions">
+          <div className="live-badge" title="Real-time live update active">
+            <span className="pulse-dot"></span>
+            <span>{t('realtimeSync')}</span>
+          </div>
+
+          <button className="btn btn-secondary" onClick={() => fetchLogs(false)}>
             <RefreshCw size={14} className={loading ? 'spin' : ''} />
             <span>{t('refresh')}</span>
           </button>
@@ -119,26 +129,26 @@ export default function DownloadLogs({ user, token }) {
             {/* MOBILE CARDS VIEW */}
             <div className="mobile-card-list">
               {logs.map((log) => (
-                <div key={log.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '0.75rem 0.85rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600, fontSize: '0.88rem' }}>
-                      <User size={14} color="var(--primary)" />
+                <div key={log.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '0.65rem 0.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>
+                      <User size={13} color="var(--primary)" />
                       <span>{log.username}</span>
                     </div>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>
+                    <span style={{ fontSize: '0.68rem', color: 'var(--text-dim)' }}>
                       {formatDate(log.downloaded_at, true)}
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#10b981', fontFamily: 'monospace', fontSize: '0.82rem', marginBottom: '0.4rem', wordBreak: 'break-all' }}>
-                    <FileText size={14} color="#10b981" style={{ flexShrink: 0 }} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#10b981', fontFamily: 'monospace', fontSize: '0.78rem', marginBottom: '0.35rem', wordBreak: 'break-all' }}>
+                    <FileText size={13} color="#10b981" style={{ flexShrink: 0 }} />
                     <span>{log.file_name}</span>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)', paddingTop: '0.3rem', borderTop: '1px solid var(--border-color)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-muted)', paddingTop: '0.25rem', borderTop: '1px solid var(--border-color)' }}>
                     <span>Size: {formatBytes(log.file_size)}</span>
-                    <span style={{ color: '#06b6d4', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}>
-                      <Globe size={12} /> {log.ip_address}
+                    <span style={{ color: '#06b6d4', display: 'inline-flex', alignItems: 'center', gap: '0.15rem' }}>
+                      <Globe size={11} /> {log.ip_address}
                     </span>
                   </div>
                 </div>

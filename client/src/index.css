@@ -1,3 +1,7 @@
+/* =============================================
+   LAN-Share Design System - Mobile-First
+   ============================================= */
+
 :root {
   --bg-primary: #0b0f19;
   --bg-secondary: #111827;
@@ -41,6 +45,9 @@
   --border-color: hsl(var(--bc) / 0.12);
 }
 
+/* =============================================
+   Reset & Base
+   ============================================= */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -67,26 +74,40 @@ body {
 }
 
 /* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
+
+/* =============================================
+   Responsive Utility Classes
+   ============================================= */
+.mobile-hidden {
+  display: none !important;
 }
 
-/* Layout Container - Strict Mobile Screen Constraints */
+.desktop-hidden {
+  display: inline-flex !important;
+}
+
+@media (min-width: 768px) {
+  .mobile-hidden {
+    display: flex !important;
+  }
+  .desktop-hidden {
+    display: none !important;
+  }
+}
+
+/* =============================================
+   Layout Container
+   ============================================= */
 .app-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   max-width: 100vw;
   overflow-x: hidden;
-  padding-bottom: 68px; /* Space for mobile bottom bar */
+  padding-bottom: 62px; /* Space for mobile bottom bar */
 }
 
 @media (min-width: 768px) {
@@ -95,7 +116,9 @@ body {
   }
 }
 
-/* Glassmorphism Card */
+/* =============================================
+   Glass Card
+   ============================================= */
 .glass-card {
   background: var(--bg-card);
   backdrop-filter: blur(16px);
@@ -112,7 +135,9 @@ body {
   border-color: rgba(255, 255, 255, 0.15);
 }
 
-/* Navigation Header */
+/* =============================================
+   Top Navbar
+   ============================================= */
 .navbar {
   background: hsl(var(--b2) / 0.95);
   backdrop-filter: blur(20px);
@@ -120,14 +145,13 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  padding: 0.45rem 0.5rem;
+  padding: 0.4rem 0.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.25rem;
   width: 100%;
   max-width: 100vw;
-  flex-wrap: wrap;
 }
 
 .nav-brand {
@@ -135,7 +159,7 @@ body {
   align-items: center;
   gap: 0.35rem;
   font-family: var(--font-heading);
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   font-weight: 700;
   color: var(--text-main);
   text-decoration: none;
@@ -154,6 +178,7 @@ body {
   flex-shrink: 0;
 }
 
+/* Desktop nav links - hidden on mobile */
 .desktop-nav-links {
   display: none;
 }
@@ -163,6 +188,9 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+  }
+  .nav-brand {
+    font-size: 0.95rem;
   }
 }
 
@@ -192,14 +220,21 @@ body {
   border: 1px solid rgba(99, 102, 241, 0.3);
 }
 
-/* User Menu & Actions */
+/* =============================================
+   User Menu & Actions
+   ============================================= */
 .user-menu {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  flex-wrap: wrap;
+  gap: 0.2rem;
   justify-content: flex-end;
   flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .user-menu {
+    gap: 0.25rem;
+  }
 }
 
 .user-badge {
@@ -214,12 +249,17 @@ body {
   flex-shrink: 0;
 }
 
-@media (max-width: 480px) {
+/* On mobile, truncate username aggressively */
+.user-badge-name {
+  max-width: 50px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 768px) {
   .user-badge-name {
-    max-width: 60px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    max-width: none;
   }
 }
 
@@ -243,7 +283,9 @@ body {
   border: 1px solid rgba(16, 185, 129, 0.4);
 }
 
-/* Mobile Bottom Navigation Bar */
+/* =============================================
+   Mobile Bottom Navigation Bar
+   ============================================= */
 .mobile-bottom-bar {
   display: flex;
   position: fixed;
@@ -256,7 +298,7 @@ body {
   border-top: 1px solid var(--border-color);
   z-index: 999;
   justify-content: space-around;
-  align-items: center;
+  align-items: stretch;
   padding-bottom: env(safe-area-inset-bottom);
   max-width: 100vw;
 }
@@ -272,36 +314,55 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 1px;
   background: transparent;
   border: none;
+  border-top: 2px solid transparent;
   color: var(--text-dim);
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 500;
   flex: 1;
   height: 100%;
   cursor: pointer;
-  transition: color 0.15s;
+  transition: color 0.15s, border-color 0.15s;
+  padding: 0.2rem 0;
+  min-width: 0;
+}
+
+.mobile-tab-btn svg {
+  flex-shrink: 0;
+}
+
+.mobile-tab-btn span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  display: block;
+  line-height: 1.2;
 }
 
 .mobile-tab-btn.active {
   color: var(--primary);
   font-weight: 600;
+  border-top-color: var(--primary);
 }
 
 .mobile-tab-btn:active {
   transform: scale(0.92);
 }
 
-/* Standard Buttons */
+/* =============================================
+   Standard Buttons
+   ============================================= */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
-  padding: 0.45rem 0.8rem;
+  gap: 0.3rem;
+  padding: 0.4rem 0.65rem;
   border-radius: var(--radius-sm);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s;
@@ -309,6 +370,14 @@ body {
   user-select: none;
   white-space: nowrap;
   max-width: 100%;
+}
+
+@media (min-width: 768px) {
+  .btn {
+    padding: 0.45rem 0.8rem;
+    font-size: 0.8rem;
+    gap: 0.35rem;
+  }
 }
 
 .btn:active {
@@ -352,13 +421,15 @@ body {
   flex-shrink: 0;
 }
 
-/* Main Layout Container */
+/* =============================================
+   Main Layout Container
+   ============================================= */
 .main-content {
   flex: 1;
   max-width: 1300px;
   width: 100%;
   margin: 0 auto;
-  padding: 0.6rem;
+  padding: 0.5rem;
   overflow-x: hidden;
 }
 
@@ -368,7 +439,101 @@ body {
   }
 }
 
-/* Breadcrumbs scroll wrapper on mobile */
+/* =============================================
+   Section Header (used in Logs, Users, Server)
+   ============================================= */
+.section-header {
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+@media (min-width: 768px) {
+  .section-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1rem;
+    margin-bottom: 1rem;
+  }
+}
+
+.section-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 767px) {
+  .section-header-actions {
+    width: 100%;
+  }
+  .section-header-actions .btn {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+/* =============================================
+   FileManager Toolbar
+   ============================================= */
+.fm-toolbar {
+  padding: 0.65rem;
+  margin-bottom: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .fm-toolbar {
+    padding: 0.85rem 1rem;
+    margin-bottom: 1rem;
+  }
+}
+
+.fm-toolbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+}
+
+@media (max-width: 767px) {
+  .fm-toolbar-row {
+    gap: 0.35rem;
+  }
+}
+
+.fm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.fm-actions .btn {
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 768px) {
+  .fm-actions {
+    display: flex;
+    gap: 0.4rem;
+    margin-top: 0.6rem;
+  }
+  .fm-actions .btn {
+    width: auto;
+  }
+}
+
+/* =============================================
+   Breadcrumbs
+   ============================================= */
 .breadcrumbs-wrapper {
   display: flex;
   align-items: center;
@@ -377,16 +542,21 @@ body {
   white-space: nowrap;
   padding-bottom: 0.2rem;
   max-width: 100%;
+  min-width: 0;
+  flex: 1;
 }
+
 .breadcrumbs-wrapper::-webkit-scrollbar {
   display: none;
 }
 
-/* Mobile File Card Grid */
+/* =============================================
+   Mobile File Card List
+   ============================================= */
 .mobile-card-list {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.45rem;
   width: 100%;
   max-width: 100%;
 }
@@ -397,6 +567,7 @@ body {
   }
 }
 
+/* Desktop Table */
 .desktop-table {
   display: none;
   width: 100%;
@@ -425,18 +596,26 @@ body {
   border-bottom: 1px solid var(--border-color);
 }
 
+/* Mobile File Card */
 .mobile-file-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.7rem 0.8rem;
+  padding: 0.6rem 0.7rem;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  gap: 0.6rem;
+  gap: 0.5rem;
   width: 100%;
   max-width: 100%;
   overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .mobile-file-card {
+    padding: 0.7rem 0.8rem;
+    gap: 0.6rem;
+  }
 }
 
 .mobile-file-card:active {
@@ -445,7 +624,7 @@ body {
 
 .mobile-file-name {
   font-weight: 500;
-  font-size: 0.86rem;
+  font-size: 0.84rem;
   color: var(--text-main);
   white-space: nowrap;
   overflow: hidden;
@@ -454,12 +633,30 @@ body {
 }
 
 .mobile-file-meta {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
-  margin-top: 0.15rem;
+  margin-top: 0.1rem;
 }
 
-/* Modals */
+/* =============================================
+   ServerAdmin Grid
+   ============================================= */
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .admin-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1rem;
+  }
+}
+
+/* =============================================
+   Modals (Bottom sheet on mobile)
+   ============================================= */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -490,7 +687,8 @@ body {
   border-bottom-right-radius: 0;
   width: 100%;
   max-width: 100vw;
-  padding: 1.1rem;
+  padding: 1rem;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
   box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8);
   max-height: 85vh;
   overflow-y: auto;
@@ -511,6 +709,7 @@ body {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 0.85rem;
+  gap: 0.5rem;
 }
 
 .modal-title {
@@ -519,7 +718,9 @@ body {
   font-weight: 600;
 }
 
-/* Form inputs */
+/* =============================================
+   Form Inputs
+   ============================================= */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -552,7 +753,78 @@ body {
   box-shadow: 0 0 0 2px var(--primary-glow);
 }
 
+/* =============================================
+   Live Badge & Pulse Dot
+   ============================================= */
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  padding: 0.15rem 0.35rem;
+  border-radius: 12px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .live-badge {
+    font-size: 0.72rem;
+    gap: 0.35rem;
+    padding: 0.2rem 0.5rem;
+  }
+}
+
+.pulse-dot {
+  width: 7px;
+  height: 7px;
+  background-color: #10b981;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
+  animation: pulseDot 2s infinite;
+}
+
+@media (min-width: 768px) {
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+/* =============================================
+   Animations
+   ============================================= */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseDot {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
 }

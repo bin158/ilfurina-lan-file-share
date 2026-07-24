@@ -1,9 +1,10 @@
-import React from 'react';
-import { HardDrive, FolderGit2, History, Users, QrCode, LogOut, Key, Shield, Palette, Languages } from 'lucide-react';
+import React, { useState } from 'react';
+import { HardDrive, FolderGit2, History, Users, QrCode, LogOut, Key, Shield, Palette, Languages, Settings, X } from 'lucide-react';
 import { useI18n } from '../I18nContext';
 
 export default function Navbar({ user, activeTab, setActiveTab, onLogout, onChangePassword, onOpenLanModal }) {
   const { lang, setLang, theme, setTheme, t, DAISY_THEMES } = useI18n();
+  const [showMobileSettings, setShowMobileSettings] = useState(false);
 
   return (
     <>
@@ -50,10 +51,10 @@ export default function Navbar({ user, activeTab, setActiveTab, onLogout, onChan
           </button>
         </div>
 
-        {/* User Menu & Settings (Theme & Language grouped together) */}
+        {/* User Menu & Settings */}
         <div className="user-menu">
-          {/* Combined Theme & Language Settings Group */}
-          <div className="settings-group" style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.15rem 0.3rem' }}>
+          {/* Theme & Language - Desktop only */}
+          <div className="settings-group mobile-hidden" style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.15rem 0.3rem' }}>
             <Palette size={13} color="var(--primary)" />
             <select
               className="select select-xs"
@@ -84,6 +85,7 @@ export default function Navbar({ user, activeTab, setActiveTab, onLogout, onChan
             </select>
           </div>
 
+          {/* User badge */}
           <div className="user-badge">
             <Shield size={13} color={user.role === 'admin' ? '#f43f5e' : '#10b981'} />
             <span className="user-badge-name" style={{ fontWeight: 600 }}>{user.username}</span>
@@ -91,6 +93,11 @@ export default function Navbar({ user, activeTab, setActiveTab, onLogout, onChan
               {user.role === 'admin' ? t('adminTag') : t('guestTag')}
             </span>
           </div>
+
+          {/* Mobile settings gear button */}
+          <button className="btn btn-secondary btn-icon desktop-hidden" onClick={() => setShowMobileSettings(true)} title={t('theme')} style={{ padding: '0.3rem' }}>
+            <Settings size={14} />
+          </button>
 
           <button className="btn btn-secondary btn-icon" onClick={onChangePassword} title={t('changePass')} style={{ padding: '0.3rem' }}>
             <Key size={14} />
@@ -102,13 +109,71 @@ export default function Navbar({ user, activeTab, setActiveTab, onLogout, onChan
         </div>
       </nav>
 
+      {/* Mobile Settings Drawer */}
+      {showMobileSettings && (
+        <div className="modal-overlay" onClick={() => setShowMobileSettings(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '100%' }}>
+            <div className="modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Settings size={20} color="var(--primary)" />
+                <h3 className="modal-title">{t('theme')} / {t('language')}</h3>
+              </div>
+              <button className="btn btn-secondary btn-icon" onClick={() => setShowMobileSettings(false)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <Palette size={14} color="var(--primary)" />
+                {t('theme')}
+              </label>
+              <select
+                className="form-input"
+                value={theme}
+                onChange={(e) => setTheme(e.target.value)}
+              >
+                {DAISY_THEMES.map(th => (
+                  <option key={th} value={th}>
+                    🎨 {th.charAt(0).toUpperCase() + th.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <Languages size={14} color="#06b6d4" />
+                {t('language')}
+              </label>
+              <select
+                className="form-input"
+                value={lang}
+                onChange={(e) => setLang(e.target.value)}
+              >
+                <option value="zh">🇨🇳 中文</option>
+                <option value="en">🇺🇸 English</option>
+              </select>
+            </div>
+
+            <button
+              className="btn btn-primary"
+              style={{ width: '100%', marginTop: '0.5rem' }}
+              onClick={() => setShowMobileSettings(false)}
+            >
+              {t('save')}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Mobile Bottom Navigation Bar */}
       <div className="mobile-bottom-bar">
         <button
           className={`mobile-tab-btn ${activeTab === 'files' ? 'active' : ''}`}
           onClick={() => setActiveTab('files')}
         >
-          <FolderGit2 size={19} />
+          <FolderGit2 size={18} />
           <span>{t('files')}</span>
         </button>
 
@@ -116,25 +181,25 @@ export default function Navbar({ user, activeTab, setActiveTab, onLogout, onChan
           className={`mobile-tab-btn ${activeTab === 'logs' ? 'active' : ''}`}
           onClick={() => setActiveTab('logs')}
         >
-          <History size={19} />
+          <History size={18} />
           <span>{t('logs')}</span>
         </button>
 
         {user.role === 'admin' && (
-          <button
-            className={`mobile-tab-btn ${activeTab === 'users' ? 'active' : ''}`}
-            onClick={() => setActiveTab('users')}
-          >
-            <Users size={19} />
-            <span>{t('users')}</span>
-          </button>
+            <button
+              className={`mobile-tab-btn ${activeTab === 'users' ? 'active' : ''}`}
+              onClick={() => setActiveTab('users')}
+            >
+              <Users size={18} />
+              <span>{t('users')}</span>
+            </button>
         )}
 
         <button
           className="mobile-tab-btn"
           onClick={onOpenLanModal}
         >
-          <QrCode size={19} color="#06b6d4" />
+          <QrCode size={18} color="#06b6d4" />
           <span style={{ color: '#06b6d4' }}>{t('scanQr')}</span>
         </button>
       </div>

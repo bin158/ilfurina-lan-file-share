@@ -25,57 +25,12 @@
       "created_at": "2026-07-24T04:42:28.188Z"
     }
   ],
-  "download_logs": [
-    {
-      "id": 1,
-      "user_id": 1,
-      "username": "admin",
-      "file_path": "Welcome_to_LAN_Share.txt",
-      "file_name": "Welcome_to_LAN_Share.txt",
-      "file_size": 785,
-      "ip_address": "127.0.0.1",
-      "user_agent": "curl/8.21.0",
-      "downloaded_at": "2026-07-24T04:42:52.993Z"
-    },
-    {
-      "id": 2,
-      "user_id": 1,
-      "username": "admin",
-      "file_path": "omni_images_converted.pdf",
-      "file_name": "omni_images_converted.pdf",
-      "file_size": 60598065,
-      "ip_address": "192.168.0.18",
-      "user_agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36",
-      "downloaded_at": "2026-07-24T04:48:57.610Z"
-    },
-    {
-      "id": 3,
-      "user_id": 1,
-      "username": "admin",
-      "file_path": "omni_images_converted.pdf",
-      "file_name": "omni_images_converted.pdf",
-      "file_size": 60598065,
-      "ip_address": "192.168.0.18",
-      "user_agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36",
-      "downloaded_at": "2026-07-24T04:48:57.645Z"
-    },
-    {
-      "id": 4,
-      "user_id": 1,
-      "username": "admin",
-      "file_path": "omni_images_converted.pdf",
-      "file_name": "omni_images_converted.pdf",
-      "file_size": 60598065,
-      "ip_address": "192.168.0.18",
-      "user_agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36",
-      "downloaded_at": "2026-07-24T04:48:57.646Z"
-    }
-  ],
+  "download_logs": [],
   "config": {
     "shared_storage_path": "/home/furina/code/lan-share/server/storage",
     "system_alert": null
   },
   "userAutoInc": 3,
-  "logAutoInc": 5,
+  "logAutoInc": 12,
   "shared_folders": []
 }

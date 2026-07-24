@@ -23,22 +23,26 @@ export default function UserManagement({ token, currentUser }) {
     allowed_paths: '*'
   });
 
-  const fetchUsers = async () => {
-    setLoading(true);
+  const fetchUsers = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       const res = await fetch('/api/users', { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to fetch users');
       setUsers(data);
     } catch (err) {
-      setError(err.message);
+      if (!isSilent) setError(err.message);
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchUsers();
+    const interval = setInterval(() => {
+      fetchUsers(true);
+    }, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleAddSubmit = async (e) => {
@@ -134,21 +138,28 @@ export default function UserManagement({ token, currentUser }) {
 
   return (
     <div>
-      <div className="glass-card" style={{ padding: '0.85rem 1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.6rem' }}>
+      <div className="glass-card section-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <div style={{ background: 'rgba(244, 63, 94, 0.15)', border: '1px solid rgba(244, 63, 94, 0.3)', width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: 'rgba(244, 63, 94, 0.15)', border: '1px solid rgba(244, 63, 94, 0.3)', width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Users size={18} color="#f43f5e" />
           </div>
-          <div>
+          <div style={{ minWidth: 0 }}>
             <h3 style={{ fontSize: '0.98rem', fontWeight: 600 }}>{t('userMgmtTitle')}</h3>
             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Role-based Access Control</p>
           </div>
         </div>
 
-        <button className="btn btn-primary" onClick={() => { resetForm(); setShowAddModal(true); }}>
-          <UserPlus size={15} />
-          <span>{t('addUserBtn')}</span>
-        </button>
+        <div className="section-header-actions">
+          <div className="live-badge" title="Real-time live update active">
+            <span className="pulse-dot"></span>
+            <span>{t('realtimeSync')}</span>
+          </div>
+
+          <button className="btn btn-primary" onClick={() => { resetForm(); setShowAddModal(true); }}>
+            <UserPlus size={15} />
+            <span>{t('addUserBtn')}</span>
+          </button>
+        </div>
       </div>
 
       {error && (

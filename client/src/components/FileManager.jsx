@@ -82,8 +82,8 @@ export default function FileManager({ user, token }) {
     }
   }, [uploadMode, showUploadModal]);
 
-  const fetchFiles = async (targetPath = currentPath) => {
-    setLoading(true);
+  const fetchFiles = async (targetPath = currentPath, isSilent = false) => {
+    if (!isSilent) setLoading(true);
     setError('');
     try {
       const res = await fetch(`/api/files/list?path=${encodeURIComponent(targetPath)}`, {
@@ -95,14 +95,20 @@ export default function FileManager({ user, token }) {
       setCurrentPath(data.currentPath);
       setItems(data.items);
     } catch (err) {
-      setError(err.message);
+      if (!isSilent) setError(err.message);
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchFiles(currentPath);
+
+    const interval = setInterval(() => {
+      fetchFiles(currentPath, true);
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, [currentPath]);
 
   const handleItemClick = (item) => {
@@ -325,8 +331,8 @@ export default function FileManager({ user, token }) {
       )}
 
       {/* Top Controls Bar */}
-      <div className="glass-card" style={{ padding: '0.85rem 1rem', marginBottom: '1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+      <div className="glass-card fm-toolbar">
+        <div className="fm-toolbar-row">
           
           {/* Breadcrumbs Navigation */}
           <div className="breadcrumbs-wrapper">
@@ -356,31 +362,36 @@ export default function FileManager({ user, token }) {
             })}
           </div>
 
-          {/* Action Buttons */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            {user.can_upload && (
-              <>
-                <button className="btn btn-primary" style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }} onClick={() => setShowUploadModal(true)}>
-                  <Upload size={15} />
-                  <span>{t('uploadFile')} / {t('uploadFolder')}</span>
-                </button>
-
-                <button className="btn btn-secondary" style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }} onClick={() => setShowMkdirModal(true)}>
-                  <FolderPlus size={15} />
-                  <span>{t('newFolder')}</span>
-                </button>
-              </>
-            )}
-
+          {/* Live badge + refresh - always visible in row */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
+            <div className="live-badge" title="Real-time live update active">
+              <span className="pulse-dot"></span>
+              <span>{t('realtimeSync')}</span>
+            </div>
             <button className="btn btn-secondary btn-icon" onClick={() => fetchFiles(currentPath)} title={t('refresh')}>
               <RefreshCw size={15} className={loading ? 'spin' : ''} />
             </button>
           </div>
         </div>
 
+        {/* Action Buttons - stacks on mobile */}
+        {user.can_upload && (
+          <div className="fm-actions">
+            <button className="btn btn-primary" onClick={() => setShowUploadModal(true)}>
+              <Upload size={15} />
+              <span>{t('uploadFile')}</span>
+            </button>
+
+            <button className="btn btn-secondary" onClick={() => setShowMkdirModal(true)}>
+              <FolderPlus size={15} />
+              <span>{t('newFolder')}</span>
+            </button>
+          </div>
+        )}
+
         {/* Search Bar & Sub-info */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.75rem', paddingTop: '0.6rem', borderTop: '1px solid var(--border-color)', flexWrap: 'wrap', gap: '0.5rem' }}>
-          <div style={{ position: 'relative', flex: 1, minWidth: '180px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.6rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border-color)', flexWrap: 'wrap', gap: '0.4rem' }}>
+          <div style={{ position: 'relative', flex: 1, minWidth: '140px' }}>
             <input
               type="text"
               className="form-input"
@@ -392,7 +403,7 @@ export default function FileManager({ user, token }) {
             <Search size={15} color="var(--text-muted)" style={{ position: 'absolute', left: '0.65rem', top: '50%', transform: 'translateY(-50%)' }} />
           </div>
 
-          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', flexShrink: 0 }}>
             {t('itemsCount', { count: filteredItems.length })}
           </div>
         </div>

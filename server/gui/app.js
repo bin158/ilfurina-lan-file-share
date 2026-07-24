@@ -60,6 +60,16 @@ function updateGuiTexts() {
 document.addEventListener('DOMContentLoaded', () => {
   initThemeSelector();
   updateGuiTexts();
+
+  // Auto real-time refresh every 3 seconds for active desktop GUI server data
+  setInterval(() => {
+    fetchLanInfo();
+    const activeTab = document.querySelector('.tab-pane.active');
+    if (activeTab) {
+      if (activeTab.id === 'tab-users') fetchUsers();
+      if (activeTab.id === 'tab-logs') fetchLogs();
+    }
+  }, 3000);
 });
 
 // Tab Switching

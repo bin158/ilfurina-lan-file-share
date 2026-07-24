@@ -21,8 +21,8 @@ export default function ServerAdmin({ token, currentUser }) {
 
   const [copiedIndex, setCopiedIndex] = useState(null);
 
-  const fetchServerInfo = async () => {
-    setLoading(true);
+  const fetchServerInfo = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     setError('');
     try {
       const res = await fetch('/api/system/lan-info', {
@@ -31,18 +31,22 @@ export default function ServerAdmin({ token, currentUser }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to fetch system info');
       setLanInfo(data);
-      if (data.sharedStoragePath) {
+      if (data.sharedStoragePath && !newSharePath) {
         setNewSharePath(data.sharedStoragePath);
       }
     } catch (err) {
-      setError(err.message);
+      if (!isSilent) setError(err.message);
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchServerInfo();
+    const interval = setInterval(() => {
+      fetchServerInfo(true);
+    }, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleUpdateSharePath = async (e) => {
@@ -118,21 +122,28 @@ export default function ServerAdmin({ token, currentUser }) {
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
       {/* Header */}
-      <div className="glass-card" style={{ padding: '1rem 1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+      <div className="glass-card section-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-          <div style={{ background: 'linear-gradient(135deg, var(--primary), #06b6d4)', width: '40px', height: '40px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: 'linear-gradient(135deg, var(--primary), #06b6d4)', width: '40px', height: '40px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Server size={22} color="white" />
           </div>
-          <div>
+          <div style={{ minWidth: 0 }}>
             <h3 style={{ fontSize: '1.05rem', fontWeight: 700 }}>{t('serverControlTitle')}</h3>
             <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{t('serverControlSub')}</p>
           </div>
         </div>
 
-        <button className="btn btn-secondary" onClick={fetchServerInfo}>
-          <RefreshCw size={15} />
-          <span>{t('refresh')}</span>
-        </button>
+        <div className="section-header-actions">
+          <div className="live-badge" title="Real-time live update active">
+            <span className="pulse-dot"></span>
+            <span>{t('realtimeSync')}</span>
+          </div>
+
+          <button className="btn btn-secondary" onClick={() => fetchServerInfo(false)}>
+            <RefreshCw size={15} className={loading ? 'spin' : ''} />
+            <span>{t('refresh')}</span>
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -142,7 +153,7 @@ export default function ServerAdmin({ token, currentUser }) {
       )}
 
       {/* Grid Layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem' }}>
+      <div className="admin-grid">
         
         {/* CARD 1: LAN Access & QR Code */}
         <div className="glass-card" style={{ padding: '1.25rem' }}>
