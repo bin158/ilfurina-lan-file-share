@@ -164,6 +164,9 @@ export default function FileManager({ user, token }) {
       formData.append('files', uploadFiles[i]);
     }
     formData.append('relativePathsJson', JSON.stringify(relativePaths));
+    if (uploadMode === 'zip') {
+      formData.append('autoUnzip', 'true');
+    }
 
     try {
       const res = await fetch(`/api/files/upload?path=${encodeURIComponent(currentPath)}`, {
@@ -524,25 +527,35 @@ export default function FileManager({ user, token }) {
               </button>
             </div>
 
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
               <button
                 type="button"
                 className={`btn ${uploadMode === 'files' ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ flex: 1, fontSize: '0.85rem' }}
+                style={{ flex: 1, fontSize: '0.8rem', padding: '0.45rem 0.5rem' }}
                 onClick={() => { setUploadMode('files'); setUploadFiles([]); setRelativePaths([]); }}
               >
-                <File size={16} />
-                <span>{t('uploadFile')}</span>
+                <File size={15} />
+                <span>{t('uploadModeFiles')}</span>
               </button>
 
               <button
                 type="button"
                 className={`btn ${uploadMode === 'folder' ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ flex: 1, fontSize: '0.85rem' }}
+                style={{ flex: 1, fontSize: '0.8rem', padding: '0.45rem 0.5rem' }}
                 onClick={() => { setUploadMode('folder'); setUploadFiles([]); setRelativePaths([]); }}
               >
-                <FolderUp size={16} />
-                <span>{t('uploadFolder')}</span>
+                <FolderUp size={15} />
+                <span>{t('uploadModeFolder')}</span>
+              </button>
+
+              <button
+                type="button"
+                className={`btn ${uploadMode === 'zip' ? 'btn-primary' : 'btn-secondary'}`}
+                style={{ flex: '1 1 100%', fontSize: '0.8rem', padding: '0.45rem 0.5rem', marginTop: '0.2rem' }}
+                onClick={() => { setUploadMode('zip'); setUploadFiles([]); setRelativePaths([]); }}
+              >
+                <Archive size={15} color="#38bdf8" />
+                <span>{t('uploadModeZip')}</span>
               </button>
             </div>
 
@@ -559,7 +572,7 @@ export default function FileManager({ user, token }) {
                     required
                   />
                 </div>
-              ) : (
+              ) : uploadMode === 'folder' ? (
                 <div className="form-group">
                   <label className="form-label">{t('selectFolderTree')}</label>
                   <input
@@ -567,6 +580,17 @@ export default function FileManager({ user, token }) {
                     className="form-input"
                     multiple
                     ref={folderInputRef}
+                    onChange={handleFileChange}
+                    required
+                  />
+                </div>
+              ) : (
+                <div className="form-group">
+                  <label className="form-label" style={{ color: '#38bdf8' }}>{t('uploadZipFolderHint')}</label>
+                  <input
+                    type="file"
+                    className="form-input"
+                    accept=".zip,application/zip,application/x-zip-compressed"
                     onChange={handleFileChange}
                     required
                   />

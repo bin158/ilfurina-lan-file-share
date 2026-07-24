@@ -195,7 +195,9 @@ router.get('/preview', authenticateToken, (req, res) => {
   }
 });
 
-// UPLOAD FILES AND FOLDERS (supporting directory tree structure!)
+import AdmZip from 'adm-zip';
+
+// UPLOAD FILES AND FOLDERS (supporting directory tree & mobile zip extraction!)
 router.post('/upload', authenticateToken, (req, res) => {
   if (!req.user.can_upload) {
     return res.status(403).json({ error: 'Upload permission denied for your account' });
@@ -208,6 +210,7 @@ router.post('/upload', authenticateToken, (req, res) => {
 
     try {
       const baseSubPath = req.query.path || '';
+      const autoUnzip = req.body.autoUnzip === 'true' || req.query.unzip === 'true';
       let relativePaths = [];
 
       if (req.body.relativePathsJson) {
@@ -219,8 +222,19 @@ router.post('/upload', authenticateToken, (req, res) => {
       }
 
       const files = req.files || [];
+
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
+
+        if (autoUnzip && (file.originalname.endsWith('.zip') || file.mimetype.includes('zip'))) {
+          // Unzip folder directly into target directory for mobile users
+          const { absolute: targetAbsDir } = getSafePath(baseSubPath);
+          const zip = new AdmZip(file.path);
+          zip.extractAllTo(targetAbsDir, true);
+          try { fs.unlinkSync(file.path); } catch (e) {}
+          continue;
+        }
+
         const relPath = (relativePaths && relativePaths[i]) ? relativePaths[i] : file.originalname;
         const targetSub = path.join(baseSubPath, relPath);
         const { absolute } = getSafePath(targetSub);
@@ -237,7 +251,7 @@ router.post('/upload', authenticateToken, (req, res) => {
         } catch (unlinkErr) {}
       }
 
-      res.json({ message: 'Files and folders uploaded successfully', count: files.length });
+      res.json({ message: 'Upload completed successfully', count: files.length });
     } catch (uploadErr) {
       res.status(500).json({ error: uploadErr.message });
     }
