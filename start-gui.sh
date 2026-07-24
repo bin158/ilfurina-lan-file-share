@@ -24,5 +24,12 @@ fi
 echo "🔨 正在同步构建最新 Web 界面..."
 npm run build --prefix client
 
-echo "🚀 启动桌面 Admin GUI 窗口..."
-npx electron server/gui/main.js --disable-vulkan --ozone-platform=x11 --no-sandbox
+# Check if X server / DISPLAY is available
+if [ -z "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ]; then
+    echo "⚠️ 警告: 未检测到图形桌面环境 (\$DISPLAY 为空)。"
+    echo "🌐 自动切换为无界面 Web 服务器模式启动..."
+    node server/index.js
+else
+    echo "🚀 启动桌面 Admin GUI 窗口..."
+    npx electron server/gui/main.js --disable-vulkan --ozone-platform=x11 --no-sandbox
+fi

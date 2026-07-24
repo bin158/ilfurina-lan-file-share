@@ -216,7 +216,7 @@ export default function ServerAdmin({ token, currentUser }) {
             </div>
 
             {pathMessage && (
-              <div style={{ fontSize: '0.82rem', marginBottom: '0.75rem', color: pathMessage.startsWith('✓') ? '#34d399' : '#fda4af' }}>
+              <div style={{ fontSize: '0.82rem', marginBottom: '0.75rem', color: pathMessage.startsWith('✓') ? '#34d399' : '#fda4af', whiteSpace: 'pre-wrap', lineHeight: '1.45' }}>
                 {pathMessage}
               </div>
             )}

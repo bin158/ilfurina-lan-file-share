@@ -95,14 +95,10 @@ router.post('/config', authenticateToken, requireAdmin, (req, res) => {
   }
 
   try {
-    const success = setSharedStoragePath(sharedStoragePath);
-    if (success) {
-      res.json({ message: 'Shared storage path updated successfully', newPath: getSharedStoragePath() });
-    } else {
-      res.status(400).json({ error: 'Failed to set shared storage path' });
-    }
+    setSharedStoragePath(sharedStoragePath);
+    res.json({ message: 'Shared storage path updated successfully', newPath: getSharedStoragePath() });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(400).json({ error: err.message });
   }
 });
 

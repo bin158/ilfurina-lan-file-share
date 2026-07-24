@@ -99,15 +99,66 @@ export function getSharedStoragePath() {
       target = defaultStorageDir;
     }
   }
+  // Safe permission test & fallback
+  try {
+    fs.accessSync(target, fs.constants.R_OK | fs.constants.W_OK);
+  } catch (e) {
+    try {
+      fs.chmodSync(target, 0o755);
+      fs.accessSync(target, fs.constants.R_OK | fs.constants.W_OK);
+    } catch (err) {
+      target = defaultStorageDir;
+    }
+  }
   return path.resolve(target);
 }
 
 export function setSharedStoragePath(newPath) {
-  if (!newPath) return false;
-  const absPath = path.resolve(newPath);
-  if (!fs.existsSync(absPath)) {
-    fs.mkdirSync(absPath, { recursive: true });
+  if (!newPath || typeof newPath !== 'string') {
+    throw new Error('共享存储路径不能为空');
   }
+
+  const absPath = path.resolve(newPath.trim());
+
+  // 1. 尝试自动创建目录（如果不存在）
+  if (!fs.existsSync(absPath)) {
+    try {
+      fs.mkdirSync(absPath, { recursive: true });
+    } catch (err) {
+      if (err.code === 'EACCES' || err.code === 'EPERM') {
+        throw new Error(
+          `权限不足：系统无法自动创建目录 "${absPath}"。\n请在服务器终端执行以下命令授权：\nsudo mkdir -p "${absPath}" && sudo chown -R $USER "${absPath}"`
+        );
+      }
+      throw new Error(`创建共享目录失败: ${err.message}`);
+    }
+  }
+
+  // 2. 自动检查与修复 chmod 755
+  try {
+    fs.accessSync(absPath, fs.constants.R_OK | fs.constants.W_OK);
+  } catch (accessErr) {
+    try {
+      fs.chmodSync(absPath, 0o755);
+      fs.accessSync(absPath, fs.constants.R_OK | fs.constants.W_OK);
+    } catch (chmodErr) {
+      throw new Error(
+        `权限不足：当前系统用户没有对 "${absPath}" 的读写权限。\n请在服务器终端执行以下命令授权：\nsudo chown -R $USER "${absPath}" && sudo chmod -R 755 "${absPath}"`
+      );
+    }
+  }
+
+  // 3. 实际写文件测试，确保完全可写
+  const testFile = path.join(absPath, `.write_test_${Date.now()}.tmp`);
+  try {
+    fs.writeFileSync(testFile, 'test');
+    fs.unlinkSync(testFile);
+  } catch (err) {
+    throw new Error(
+      `写入测试失败：无法向 "${absPath}" 写入文件。\n请在服务器终端执行：\nsudo chown -R $USER "${absPath}" && sudo chmod -R 755 "${absPath}"`
+    );
+  }
+
   data.config.shared_storage_path = absPath;
   saveDb();
   return true;

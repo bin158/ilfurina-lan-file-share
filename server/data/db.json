@@ -27,7 +27,7 @@
   ],
   "download_logs": [],
   "config": {
-    "shared_storage_path": "/home/furina/code/lan-share/server/storage",
+    "shared_storage_path": "/app/server/storage",
     "system_alert": null
   },
   "userAutoInc": 3,
