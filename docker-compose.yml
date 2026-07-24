@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  lan-share:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lan-share
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      # Persistent host directory for shared files
+      - ./storage:/app/server/storage
+      # Persistent host directory for SQLite JSON DB and logs
+      - ./data:/app/server/data
+    environment:
+      - PORT=3000
+      - NODE_ENV=production

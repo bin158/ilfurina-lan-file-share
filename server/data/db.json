@@ -1,0 +1,86 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password_hash": "$2a$10$8r9XYqEkBVqDdC0DLmSf7uZfeBpVMlrsPPRPNEDc0X4U.7swcB3f2",
+      "role": "admin",
+      "can_download": 1,
+      "can_upload": 1,
+      "can_delete": 1,
+      "allowed_paths": "*",
+      "is_active": 1,
+      "created_at": "2026-07-24T04:42:28.069Z"
+    },
+    {
+      "id": 2,
+      "username": "guest",
+      "password_hash": "$2a$10$2zhttsjB1UsNCAO3pVjM.ehsxSZTc5.3r1GUtItuzOFopzSGm4NuC",
+      "role": "user",
+      "can_download": 1,
+      "can_upload": 0,
+      "can_delete": 0,
+      "allowed_paths": "*",
+      "is_active": 1,
+      "created_at": "2026-07-24T04:42:28.188Z"
+    }
+  ],
+  "download_logs": [
+    {
+      "id": 1,
+      "user_id": 1,
+      "username": "admin",
+      "file_path": "Welcome_to_LAN_Share.txt",
+      "file_name": "Welcome_to_LAN_Share.txt",
+      "file_size": 785,
+      "ip_address": "127.0.0.1",
+      "user_agent": "curl/8.21.0",
+      "downloaded_at": "2026-07-24T04:42:52.993Z"
+    },
+    {
+      "id": 2,
+      "user_id": 1,
+      "username": "admin",
+      "file_path": "omni_images_converted.pdf",
+      "file_name": "omni_images_converted.pdf",
+      "file_size": 60598065,
+      "ip_address": "192.168.0.18",
+      "user_agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36",
+      "downloaded_at": "2026-07-24T04:48:57.610Z"
+    },
+    {
+      "id": 3,
+      "user_id": 1,
+      "username": "admin",
+      "file_path": "omni_images_converted.pdf",
+      "file_name": "omni_images_converted.pdf",
+      "file_size": 60598065,
+      "ip_address": "192.168.0.18",
+      "user_agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36",
+      "downloaded_at": "2026-07-24T04:48:57.645Z"
+    },
+    {
+      "id": 4,
+      "user_id": 1,
+      "username": "admin",
+      "file_path": "omni_images_converted.pdf",
+      "file_name": "omni_images_converted.pdf",
+      "file_size": 60598065,
+      "ip_address": "192.168.0.18",
+      "user_agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36",
+      "downloaded_at": "2026-07-24T04:48:57.646Z"
+    }
+  ],
+  "config": {
+    "shared_storage_path": "/home/furina/code/lan-share/server/storage",
+    "system_alert": {
+      "id": 1784869248031,
+      "message": "你好",
+      "type": "info",
+      "createdAt": "2026-07-24T05:00:48.031Z"
+    }
+  },
+  "userAutoInc": 3,
+  "logAutoInc": 5,
+  "shared_folders": []
+}

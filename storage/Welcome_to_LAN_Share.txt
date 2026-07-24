@@ -1,0 +1,20 @@
+==============================================
+ Welcome to LAN-Share 局域网文件共享系统
+==============================================
+
+This is your local network file sharing server.
+支持 Linux 与 Windows 跨平台文件传输、多用户权限分配与下载日志记录。
+
+Key Features / 主要功能:
+1. 局域网内任意设备通过浏览器访问 (支持电脑、手机、平板)
+2. 多用户权限管理: 管理员可添加用户，设置下载/上传/删除权限
+3. 详细下载日志: 记录下载者、文件名称、文件大小、下载时间及 IP
+4. 文件在线预览: 图片、音频、视频 (支持 Seek)、文本在线预览
+
+Default Admin Account:
+  Username: admin
+  Password: admin123
+
+Default Guest Account:
+  Username: guest
+  Password: guest123
