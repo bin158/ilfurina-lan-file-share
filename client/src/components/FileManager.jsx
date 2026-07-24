@@ -119,7 +119,7 @@ export default function FileManager({ user, token }) {
         const text = await res.text();
         setPreviewTextContent(text.substring(0, 100000));
       } catch (err) {
-        setPreviewTextContent('Failed to load text: ' + err.message);
+        setPreviewTextContent(err.message);
       }
     }
   };
@@ -259,7 +259,7 @@ export default function FileManager({ user, token }) {
         fetchFiles(currentPath);
       }
     } catch (err) {
-      alert('Upload error: ' + err.message);
+      alert(err.message);
     } finally {
       setUploading(false);
     }
@@ -297,7 +297,7 @@ export default function FileManager({ user, token }) {
           color: 'white', fontSize: '1.25rem', fontWeight: 700, border: '4px dashed white'
         }}>
           <Upload size={48} style={{ marginBottom: '1rem' }} />
-          <span>Drop files or folders to upload into "{currentPath || 'Root Share'}"</span>
+          <span>{t('dropToUpload')} "{currentPath || t('shareRoot')}"</span>
         </div>
       )}
 
@@ -385,7 +385,7 @@ export default function FileManager({ user, token }) {
       <div className="glass-card" style={{ overflow: 'hidden', padding: '0.5rem' }}>
         {loading ? (
           <div style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-            Loading...
+            {t('loading')}
           </div>
         ) : filteredItems.length === 0 ? (
           <div style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
@@ -395,7 +395,7 @@ export default function FileManager({ user, token }) {
         ) : (
           <>
             {/* MOBILE CARDS VIEW */}
-            <div className="mobile-file-grid">
+            <div className="mobile-card-list">
               {filteredItems.map((item, idx) => (
                 <div key={idx} className="mobile-file-card" onClick={() => handleItemClick(item)}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}>
@@ -549,7 +549,7 @@ export default function FileManager({ user, token }) {
             <form onSubmit={handleUploadSubmit}>
               {uploadMode === 'files' ? (
                 <div className="form-group">
-                  <label className="form-label">Select Files</label>
+                  <label className="form-label">{t('selectFiles')}</label>
                   <input
                     type="file"
                     className="form-input"
@@ -561,7 +561,7 @@ export default function FileManager({ user, token }) {
                 </div>
               ) : (
                 <div className="form-group">
-                  <label className="form-label">Select Directory Tree</label>
+                  <label className="form-label">{t('selectFolderTree')}</label>
                   <input
                     type="file"
                     className="form-input"
@@ -575,14 +575,14 @@ export default function FileManager({ user, token }) {
 
               {uploadFiles.length > 0 && (
                 <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                  Ready to upload <b>{uploadFiles.length}</b> file(s).
+                  {t('readyToUpload', { count: uploadFiles.length })}
                 </div>
               )}
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1.25rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setShowUploadModal(false)}>{t('cancel')}</button>
                 <button type="submit" className="btn btn-primary" disabled={uploading || uploadFiles.length === 0}>
-                  {uploading ? 'Uploading...' : t('uploadFile')}
+                  {uploading ? t('uploading') : t('uploadFile')}
                 </button>
               </div>
             </form>

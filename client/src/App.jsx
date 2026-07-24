@@ -5,10 +5,9 @@ import FileManager from './components/FileManager';
 import DownloadLogs from './components/DownloadLogs';
 import UserManagement from './components/UserManagement';
 import LanInfoModal from './components/LanInfoModal';
+import ServerAdmin from './components/ServerAdmin';
 import { Key, X, Bell, AlertTriangle, Send } from 'lucide-react';
 import { useI18n } from './I18nContext';
-
-import ServerAdmin from './components/ServerAdmin';
 
 export default function App() {
   const { t } = useI18n();
@@ -137,7 +136,7 @@ export default function App() {
         },
         body: JSON.stringify({ message: broadcastMsg.trim(), type: 'info' })
       });
-      if (!res.ok) throw new Error(t('sendBroadcastBtn') + ' failed');
+      if (!res.ok) throw new Error('Failed to send broadcast');
 
       setShowBroadcastModal(false);
       setBroadcastMsg('');
@@ -162,7 +161,7 @@ export default function App() {
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-        Loading LAN-Share...
+        {t('loadingSystem')}
       </div>
     );
   }

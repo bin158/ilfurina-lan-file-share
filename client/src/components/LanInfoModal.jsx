@@ -42,7 +42,7 @@ export default function LanInfoModal({ token, onClose }) {
 
         {loading ? (
           <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-            Loading LAN IP...
+            {t('loading')}
           </div>
         ) : lanData ? (
           <div>
@@ -55,13 +55,13 @@ export default function LanInfoModal({ token, onClose }) {
                 />
               )}
               <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.75rem' }}>
-                📱 {t('scanTip')}
+                📱 {t('mobileScanTip')}
               </p>
             </div>
 
             <div style={{ marginBottom: '1rem' }}>
               <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem', fontWeight: 500 }}>
-                {t('currentIpLabel')}
+                {t('ipv4Access')}
               </div>
 
               {lanData.lanIps.map((item, idx) => {
@@ -81,7 +81,7 @@ export default function LanInfoModal({ token, onClose }) {
                     }}
                   >
                     <div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Nic: {item.interface}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{t('nic')}: {item.interface}</div>
                       <div style={{ fontWeight: 600, color: '#38bdf8', fontFamily: 'monospace', fontSize: '0.95rem' }}>
                         {url}
                       </div>
@@ -100,12 +100,12 @@ export default function LanInfoModal({ token, onClose }) {
             </div>
 
             <div style={{ display: 'flex', gap: '1rem', background: 'rgba(255,255,255,0.02)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: 'var(--text-dim)' }}>
-              <div>Host: <b style={{ color: 'var(--text-muted)' }}>{lanData.hostname}</b></div>
-              <div>OS: <b style={{ color: 'var(--text-muted)' }}>{lanData.platform} ({lanData.arch})</b></div>
+              <div>{t('host')}: <b style={{ color: 'var(--text-muted)' }}>{lanData.hostname}</b></div>
+              <div>{t('os')}: <b style={{ color: 'var(--text-muted)' }}>{lanData.platform} ({lanData.arch})</b></div>
             </div>
           </div>
         ) : (
-          <div style={{ padding: '1rem', color: '#fda4af' }}>Failed to load LAN addresses</div>
+          <div style={{ padding: '1rem', color: '#fda4af' }}>{t('loadLanError')}</div>
         )}
       </div>
     </div>
