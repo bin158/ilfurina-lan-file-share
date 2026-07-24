@@ -5,6 +5,16 @@ let primaryLanIp = '127.0.0.1';
 let cachedLogsData = [];
 let currentGuiLang = localStorage.getItem('lan_share_lang') || 'zh';
 
+function tGui(key, replacements = {}) {
+  if (typeof guiTranslations === 'undefined') return key;
+  const dict = guiTranslations[currentGuiLang] || guiTranslations.zh;
+  let str = dict[key] || key;
+  Object.keys(replacements).forEach(k => {
+    str = str.replace(new RegExp(`{{${k}}}`, 'g'), replacements[k]);
+  });
+  return str;
+}
+
 function initThemeSelector() {
   const select = document.getElementById('guiThemeSelect');
   if (select && typeof DAISY_THEMES !== 'undefined') {
@@ -40,6 +50,11 @@ function updateGuiTexts() {
       elem.textContent = dict[key];
     }
   });
+
+  // Re-render dynamic elements
+  fetchUsers();
+  fetchLogs();
+  fetchLanInfo();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -78,7 +93,7 @@ window.clearConsole = function() {
 window.copyConsoleLogs = function() {
   const text = consoleElem.innerText;
   clipboard.writeText(text);
-  alert('控制台日志已复制到剪贴板！');
+  alert(tGui('consoleCopied'));
 };
 
 window.copyTableLogs = function() {
@@ -87,7 +102,7 @@ window.copyTableLogs = function() {
     `[${new Date(l.downloaded_at).toLocaleString()}] User: ${l.username} | File: ${l.file_name} (${l.file_path}) | Size: ${l.file_size}B | IP: ${l.ip_address}`
   ).join('\n');
   clipboard.writeText(text);
-  alert('下载日志列表已复制到剪贴板！');
+  alert(tGui('logsCopied'));
 };
 
 // Server Status IPC Listeners
@@ -102,14 +117,14 @@ ipcRenderer.on('server-status', (event, data) => {
     currentPort = data.port || 3000;
     pill.className = 'status-pill online';
     dot.className = 'dot online';
-    text.textContent = `服务器在线 (http://${primaryLanIp}:${currentPort})`;
+    text.textContent = tGui('serverOnlineUrl', { ip: primaryLanIp, port: currentPort });
     btnStart.style.display = 'none';
     btnStop.style.display = 'inline-flex';
     fetchLanInfo();
   } else {
     pill.className = 'status-pill offline';
     dot.className = 'dot offline';
-    text.textContent = '服务器已停止';
+    text.textContent = tGui('serverOffline');
     btnStart.style.display = 'inline-flex';
     btnStop.style.display = 'none';
   }
@@ -155,7 +170,7 @@ async function fetchLanInfo() {
     const info = await sysRes.json();
 
     primaryLanIp = info.primaryIp || '127.0.0.1';
-    document.getElementById('statusText').textContent = `服务器在线 (http://${primaryLanIp}:${info.port})`;
+    document.getElementById('statusText').textContent = tGui('serverOnlineUrl', { ip: primaryLanIp, port: info.port });
 
     // Custom folder path input
     const sharedInput = document.getElementById('sharedFolderInput');
@@ -166,7 +181,7 @@ async function fetchLanInfo() {
     const lanContainer = document.getElementById('lanIpList');
     lanContainer.innerHTML = info.lanIps.map(item => `
       <div style="background: rgba(255,255,255,0.04); padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 0.4rem; font-size: 0.85rem;">
-        <div style="color: var(--text-muted); font-size: 0.72rem;">网卡: ${item.interface}</div>
+        <div style="color: var(--text-muted); font-size: 0.72rem;">${tGui('nicLabel')}: ${item.interface}</div>
         <div style="color: #38bdf8; font-weight: 600; font-family: monospace;">http://${item.ip}:${info.port}</div>
       </div>
     `).join('');
@@ -203,12 +218,12 @@ window.updateSharedFolder = async function() {
       body: JSON.stringify({ sharedStoragePath: newPath })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || '失败');
+    if (!res.ok) throw new Error(data.error || 'Failed');
 
-    alert(`自定义共享文件夹路径已成功修改为:\n${data.newPath}`);
+    alert(tGui('pathUpdatedSuccess', { path: data.newPath }));
     fetchLanInfo();
   } catch (e) {
-    alert('修改共享文件夹路径失败: ' + e.message);
+    alert(tGui('pathUpdateError') + e.message);
   }
 };
 
@@ -238,11 +253,11 @@ async function fetchUsers() {
         <td>${u.can_upload ? '✓' : '✗'}</td>
         <td>${u.can_delete ? '✓' : '✗'}</td>
         <td style="font-family: monospace; font-size: 0.78rem;">${u.allowed_paths}</td>
-        <td><b>${u.download_count}</b> 次</td>
-        <td>${u.is_active ? '<span style="color:#10b981">正常</span>' : '<span style="color:#f43f5e">禁用</span>'}</td>
+        <td><b>${u.download_count}</b> ${tGui('timesUnit')}</td>
+        <td>${u.is_active ? `<span style="color:#10b981">${tGui('active')}</span>` : `<span style="color:#f43f5e">${tGui('banned')}</span>`}</td>
         <td style="text-align:right;">
-          <button className="btn btn-secondary" style="font-size:0.75rem; padding: 0.2rem 0.5rem;" onclick="openEditUserModal(${u.id})">编辑</button>
-          <button className="btn btn-secondary" style="font-size:0.75rem; padding: 0.2rem 0.5rem; color:#f43f5e;" onclick="deleteUserGui(${u.id}, '${u.username}')">删除</button>
+          <button className="btn btn-secondary" style="font-size:0.75rem; padding: 0.2rem 0.5rem;" onclick="openEditUserModal(${u.id})">${tGui('edit')}</button>
+          <button className="btn btn-secondary" style="font-size:0.75rem; padding: 0.2rem 0.5rem; color:#f43f5e;" onclick="deleteUserGui(${u.id}, '${u.username}')">${tGui('delete')}</button>
         </td>
       </tr>
     `).join('');
@@ -253,7 +268,7 @@ async function fetchUsers() {
 
 // User Modal Handlers
 window.showAddUserModal = function() {
-  document.getElementById('modalUserTitle').textContent = '添加新用户';
+  document.getElementById('modalUserTitle').textContent = tGui('addUserTitle');
   document.getElementById('editUserId').value = '';
   document.getElementById('editUsername').value = '';
   document.getElementById('editPassword').value = '';
@@ -269,7 +284,7 @@ window.openEditUserModal = function(id) {
   const u = cachedUsers.find(user => user.id === id);
   if (!u) return;
 
-  document.getElementById('modalUserTitle').textContent = `编辑用户: ${u.username}`;
+  document.getElementById('modalUserTitle').textContent = `${tGui('editUserTitle')}: ${u.username}`;
   document.getElementById('editUserId').value = u.id;
   document.getElementById('editUsername').value = u.username;
   document.getElementById('editPassword').value = '';
@@ -296,7 +311,7 @@ window.saveUserGui = async function() {
   const allowed_paths = document.getElementById('editAllowedPaths').value.trim();
 
   if (!username) {
-    alert('用户名不能为空');
+    alert(tGui('usernameRequired'));
     return;
   }
 
@@ -336,7 +351,7 @@ window.saveUserGui = async function() {
     }
 
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || '保存失败');
+    if (!res.ok) throw new Error(data.error || tGui('saveUserFailed'));
 
     closeUserModal();
     fetchUsers();
@@ -347,7 +362,7 @@ window.saveUserGui = async function() {
 
 // Delete User GUI
 window.deleteUserGui = async function(id, username) {
-  if (!confirm(`确定要删除用户 ${username} 吗？`)) return;
+  if (!confirm(tGui('confirmDeleteUser', { username }))) return;
   try {
     const authRes = await fetch(`http://localhost:${currentPort}/api/auth/login`, {
       method: 'POST',
@@ -362,7 +377,7 @@ window.deleteUserGui = async function(id, username) {
     });
     if (!res.ok) {
       const data = await res.json();
-      throw new Error(data.error || '删除失败');
+      throw new Error(data.error || tGui('deleteFailed'));
     }
     fetchUsers();
   } catch (e) {
@@ -405,7 +420,7 @@ async function fetchLogs() {
 
 // Clear Logs in GUI
 window.clearServerLogs = async function() {
-  if (!confirm('确定要清空所有历史下载日志吗？')) return;
+  if (!confirm(tGui('confirmClearLogs'))) return;
   try {
     const authRes = await fetch(`http://localhost:${currentPort}/api/auth/login`, {
       method: 'POST',
@@ -428,7 +443,7 @@ window.clearServerLogs = async function() {
 window.sendBroadcastGui = async function() {
   const msg = document.getElementById('broadcastInput').value.trim();
   if (!msg) {
-    alert('请输入广播通知内容');
+    alert(tGui('broadcastPrompt'));
     return;
   }
 
@@ -448,9 +463,9 @@ window.sendBroadcastGui = async function() {
       },
       body: JSON.stringify({ message: msg, type: 'info' })
     });
-    if (!res.ok) throw new Error('发送广播失败');
+    if (!res.ok) throw new Error('Broadcast failed');
 
-    alert('✅ 全网广播 Notification 发布成功！在线 Web 用户将实时接收该通知。');
+    alert(tGui('broadcastSuccessMsg'));
   } catch (e) {
     alert(e.message);
   }
@@ -471,7 +486,7 @@ window.clearBroadcastGui = async function() {
     });
 
     document.getElementById('broadcastInput').value = '';
-    alert('广播 Notification 已撤销');
+    alert(tGui('broadcastRevokedMsg'));
   } catch (e) {
     alert(e.message);
   }

@@ -73,6 +73,23 @@ const guiTranslations = {
     size: "大小",
     clientIp: "客户端 IP",
     downloadTime: "下载时间",
+    
+    // Dynamic alerts & prompts
+    consoleCopied: "控制台日志已复制到剪贴板！",
+    logsCopied: "下载日志列表已复制到剪贴板！",
+    serverOnlineUrl: "服务器在线 (http://{{ip}}:{{port}})",
+    pathUpdatedSuccess: "自定义共享文件夹路径已成功修改为:\n{{path}}",
+    pathUpdateError: "修改共享文件夹路径失败: ",
+    usernameRequired: "用户名不能为空",
+    saveUserFailed: "保存失败: ",
+    confirmDeleteUser: "确定要删除用户 {{username}} 吗？",
+    deleteFailed: "删除失败: ",
+    confirmClearLogs: "确定要清空所有历史下载日志吗？",
+    broadcastPrompt: "请输入广播通知内容",
+    broadcastSuccessMsg: "✅ 全网广播 Notification 发布成功！在线 Web 用户将实时接收该通知。",
+    broadcastRevokedMsg: "广播 Notification 已撤销",
+    nicLabel: "网卡",
+    timesUnit: "次"
   },
   en: {
     serverAdminTitle: "LAN-Share Server Admin Desktop Panel",
@@ -140,6 +157,23 @@ const guiTranslations = {
     size: "Size",
     clientIp: "Client IP",
     downloadTime: "Download Time",
+
+    // Dynamic alerts & prompts
+    consoleCopied: "Console logs copied to clipboard!",
+    logsCopied: "Download log records copied to clipboard!",
+    serverOnlineUrl: "Server Online (http://{{ip}}:{{port}})",
+    pathUpdatedSuccess: "Custom shared directory updated to:\n{{path}}",
+    pathUpdateError: "Failed to update shared folder: ",
+    usernameRequired: "Username cannot be empty",
+    saveUserFailed: "Failed to save user: ",
+    confirmDeleteUser: "Are you sure you want to delete user {{username}}?",
+    deleteFailed: "Failed to delete: ",
+    confirmClearLogs: "Are you sure you want to clear all audit logs?",
+    broadcastPrompt: "Please enter broadcast message content",
+    broadcastSuccessMsg: "✅ Broadcast published successfully! All online Web users will receive it in real-time.",
+    broadcastRevokedMsg: "Broadcast Notification revoked",
+    nicLabel: "NIC",
+    timesUnit: "downloads"
   }
 };
 
