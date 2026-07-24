@@ -18,21 +18,23 @@ function formatBytes(bytes, decimals = 2) {
 
 function formatDate(dateVal, includeTime = true) {
   if (!dateVal) return '-';
-  let str = String(dateVal);
-  if (typeof dateVal === 'string' && dateVal.includes(' ') && !dateVal.includes('T')) {
-    str = str.replace(' ', 'T');
-  }
-  const d = new Date(str);
-  if (isNaN(d.getTime())) {
-    const num = Number(dateVal);
-    if (!isNaN(num)) {
-      const dNum = new Date(num);
-      if (!isNaN(dNum.getTime())) {
-        return includeTime ? dNum.toLocaleString() : dNum.toLocaleDateString();
-      }
+  let d;
+  if (dateVal instanceof Date) {
+    d = dateVal;
+  } else if (typeof dateVal === 'number') {
+    d = new Date(dateVal);
+  } else {
+    let str = String(dateVal);
+    if (str.includes(' ') && !str.includes('T')) {
+      str = str.replace(' ', 'T');
     }
-    return '-';
+    d = new Date(str);
+    if (isNaN(d.getTime())) {
+      const num = Number(dateVal);
+      if (!isNaN(num)) d = new Date(num);
+    }
   }
+  if (!d || isNaN(d.getTime())) return '-';
   return includeTime ? d.toLocaleString() : d.toLocaleDateString();
 }
 
@@ -602,7 +604,7 @@ export default function FileManager({ user, token }) {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div className="mobile-file-name">{item.name}</div>
                       <div className="mobile-file-meta">
-                        {item.isDirectory ? t('newFolder') : formatBytes(item.size)} • {formatDate(item.mtime, false)}
+                        {item.isDirectory ? t('newFolder') : formatBytes(item.size)} • {formatDate(item.mtime || item.modifiedAt, false)}
                       </div>
                     </div>
                   </div>
@@ -648,7 +650,7 @@ export default function FileManager({ user, token }) {
                       {item.isDirectory ? '-' : formatBytes(item.size)}
                     </td>
                     <td style={{ color: 'var(--text-dim)', fontSize: '0.82rem' }}>
-                      {formatDate(item.mtime, true)}
+                      {formatDate(item.mtime || item.modifiedAt, true)}
                     </td>
                     <td style={{ textAlign: 'right' }} onClick={(e) => e.stopPropagation()}>
                       <div style={{ display: 'inline-flex', gap: '0.4rem' }}>

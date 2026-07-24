@@ -20,7 +20,7 @@
       "can_download": 1,
       "can_upload": 0,
       "can_delete": 0,
-      "allowed_paths": "*",
+      "allowed_paths": "Documents",
       "is_active": 1,
       "created_at": "2026-07-24T05:03:54.203Z"
     }
@@ -36,6 +36,17 @@
       "ip_address": "192.168.65.1",
       "user_agent": "Mozilla/5.0 (X11; Linux x86_64; rv:152.0) Gecko/20100101 Firefox/152.0",
       "downloaded_at": "2026-07-24T06:58:17.024Z"
+    },
+    {
+      "id": 2,
+      "user_id": 2,
+      "username": "guest",
+      "file_path": "Documents/LAN_Share_Guide.md",
+      "file_name": "LAN_Share_Guide.md",
+      "file_size": 110,
+      "ip_address": "192.168.65.1",
+      "user_agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36",
+      "downloaded_at": "2026-07-24T09:41:37.074Z"
     }
   ],
   "config": {
@@ -43,5 +54,5 @@
     "system_alert": null
   },
   "userAutoInc": 4,
-  "logAutoInc": 2
+  "logAutoInc": 3
 }

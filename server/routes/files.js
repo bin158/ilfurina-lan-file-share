@@ -98,6 +98,7 @@ router.get('/list', authenticateToken, (req, res) => {
         isDirectory: isDir,
         size: isDir ? 0 : itemStat.size,
         modifiedAt: itemStat.mtime,
+        mtime: itemStat.mtime,
         mimeType
       };
     }).filter(Boolean);
