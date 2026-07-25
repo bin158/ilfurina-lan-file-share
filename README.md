@@ -1,6 +1,6 @@
 # LAN-Share: Cross-Platform LAN File Sharing & Management System
 
-A lightweight, Samba-like local network file sharing, transfer, and permission management system with support for **Linux**, **Windows**, and **Docker containerized deployment**.
+A lightweight, local network file sharing, transfer, and permission management system with support for **Linux**, **Windows**, and **Docker containerized deployment**.
 
 Any device connected to the same LAN (PCs, smartphones, tablets) can directly access, log in, browse, and download files via browser. Features include multi-user role-based access control, directory tree uploads, real-time download log auditing, and system-wide notification broadcasts.
 
